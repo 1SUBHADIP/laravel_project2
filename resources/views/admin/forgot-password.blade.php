@@ -24,6 +24,15 @@
       </div>
     @endif
 
+    @if (session('reset_link'))
+      <div class="mb-4 p-3 rounded-lg bg-blue-900/40 border border-blue-700 text-blue-200 text-sm space-y-2">
+        <div>Password reset link:</div>
+        <a href="{{ session('reset_link') }}" class="break-all underline text-blue-300 hover:text-blue-100">
+          {{ session('reset_link') }}
+        </a>
+      </div>
+    @endif
+
     @if($errors->any())
       <div class="mb-4 p-3 rounded-lg bg-red-900/40 border border-red-700 text-red-200 text-sm">
         <ul class="list-disc ml-5 space-y-1">

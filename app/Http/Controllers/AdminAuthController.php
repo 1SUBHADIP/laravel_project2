@@ -119,6 +119,9 @@ class AdminAuthController extends Controller
             return back()->with('status', 'If your administrator account exists, a password reset link has been sent.');
         }
 
+        $token = Password::createToken($user);
+        $resetLink = url('/admin/reset-password/' . $token . '?email=' . urlencode($user->email));
+
         try {
             $status = Password::broker()->sendResetLink([
                 'email' => $data['email'],
@@ -135,16 +138,10 @@ class AdminAuthController extends Controller
         }
 
         if ($status === Password::RESET_LINK_SENT) {
-            $response = back()->with('status', __($status));
-
-            if (app()->environment('local') && config('app.debug')) {
-                $token = Password::createToken($user);
-                $debugLink = url('/admin/reset-password/' . $token . '?email=' . urlencode($user->email));
-
-                $response->with('reset_link', $debugLink);
-            }
-
-            return $response;
+            return back()->with([
+                'status' => 'Password reset link prepared successfully.',
+                'reset_link' => $resetLink,
+            ]);
         }
 
         if ($status === Password::RESET_THROTTLED) {
@@ -157,7 +154,7 @@ class AdminAuthController extends Controller
 
         return back()->withErrors([
             'email' => __($status),
-        ]);
+        ])->with('reset_link', $resetLink);
     }
 
     public function showResetPassword(string $token, Request $request): View|RedirectResponse
