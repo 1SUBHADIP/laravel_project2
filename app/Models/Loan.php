@@ -133,9 +133,11 @@ class Loan extends Model
      */
     public function scopeOverdue($query)
     {
+        $overdueThreshold = Carbon::today()->subDays(3)->toDateString();
+
         return $query->where('status', '!=', 'returned')
             ->whereNull('returned_date')
-            ->whereRaw('DATE_ADD(due_date, INTERVAL 3 DAY) < CURDATE()');
+            ->whereDate('due_date', '<', $overdueThreshold);
     }
 
     /**

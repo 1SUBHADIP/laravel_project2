@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
+use RuntimeException;
 
 class SettingsController extends Controller
 {
@@ -52,7 +53,18 @@ class SettingsController extends Controller
 
         // If password change is requested, verify current password first
         if ($request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
+            $currentPasswordValid = false;
+
+            try {
+                $currentPasswordValid = Hash::check($request->current_password, $user->password);
+            } catch (RuntimeException $e) {
+                if (hash_equals((string) $user->password, (string) $request->current_password)) {
+                    $currentPasswordValid = true;
+                    $user->password = Hash::make($request->current_password);
+                }
+            }
+
+            if (!$currentPasswordValid) {
                 return redirect()->route('settings.index')
                     ->with('error', 'Current password is incorrect!');
             }

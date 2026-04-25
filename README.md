@@ -33,6 +33,27 @@ php artisan serve --host=127.0.0.1 --port=8000
 - Default loan period is 14 days (configurable in `LoanController@store`).
 - Uses SQLite; to switch DB, update `.env` and run migrations.
 
+### Render Deployment (Persistent Data)
+
+Use the included `render.yaml` blueprint for deployment. It configures:
+
+- Persistent disk mount at `/var/data`
+- SQLite path `DB_DATABASE=/var/data/database.sqlite`
+- Stable production settings for session/cache/queue
+
+Important:
+
+- Set a fixed `APP_KEY` in Render environment variables (do not leave it empty).
+- If `APP_KEY` is missing in production, the container now fails startup intentionally to prevent broken remember-me cookies.
+- If Render persistent disk is missing, startup now fails intentionally to avoid silent data loss from ephemeral SQLite storage.
+
+Quick setup:
+
+1. Use values from `.env.render.example` for Render environment variables.
+2. Set `APP_KEY` to a fixed value (example: run `php artisan key:generate --show` once locally and copy that value).
+3. Attach a persistent disk and mount it at `/var/data`.
+4. Redeploy.
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

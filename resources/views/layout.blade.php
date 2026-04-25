@@ -166,7 +166,7 @@
                 </div>
                 
                 <template x-for="notification in notifications" :key="notification.id">
-                  <div @click="markAsRead(notification.id)" 
+                  <div @click="handleNotificationClick(notification)" 
                        class="px-4 py-3 border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer transition-colors"
                        :class="{ 'bg-slate-800/30': !notification.read }">
                     <div class="flex items-start gap-3">
@@ -237,6 +237,10 @@
                   <i class="fas fa-chart-bar text-slate-400"></i>
                   Reports
                 </a>
+                <a href="{{ route('notifications.view-all') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 transition-colors">
+                  <i class="fas fa-bell text-slate-400"></i>
+                  Notifications
+                </a>
                 
                 <!-- Divider -->
                 <div class="border-t border-slate-700 my-2"></div>
@@ -296,6 +300,12 @@
               <a href="{{ route('books.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('books.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-book w-5"></i>
                 <span>Books</span>
+              </a>
+            </li>
+            <li>
+              <a href="{{ route('notifications.view-all') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('notifications.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
+                <i class="fas fa-bell w-5"></i>
+                <span>Notifications</span>
               </a>
             </li>
             <li>
@@ -611,111 +621,123 @@
           } catch (error) {
             console.error('Failed to load notifications:', error);
           }
-        },      toggleDropdown() {
-        this.open = !this.open;
-      },
+        },
+
+        toggleDropdown() {
+          this.open = !this.open;
+        },
       
-      async markAsRead(notificationId) {
-        try {
-          await fetch('{{ route("notifications.mark-read") }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ id: notificationId })
-          });
-          
-          // Update local state
-          const notification = this.notifications.find(n => n.id === notificationId);
-          if (notification && !notification.read) {
-            notification.read = true;
-            this.unreadCount = Math.max(0, this.unreadCount - 1);
+        async markAsRead(notificationId) {
+          try {
+            await fetch('{{ route("notifications.mark-read") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: JSON.stringify({ id: notificationId })
+            });
+            
+            // Update local state
+            const notification = this.notifications.find(n => n.id === notificationId);
+            if (notification && !notification.read) {
+              notification.read = true;
+              this.unreadCount = Math.max(0, this.unreadCount - 1);
+            }
+          } catch (error) {
+            console.error('Failed to mark notification as read:', error);
           }
-        } catch (error) {
-          console.error('Failed to mark notification as read:', error);
-        }
-      },
+        },
+
+        async handleNotificationClick(notification) {
+          if (!notification.read) {
+            await this.markAsRead(notification.id);
+          }
+
+          if (notification.action_url) {
+            window.location.href = notification.action_url;
+          }
+        },
       
-      async markAllAsRead() {
-        try {
-          await fetch('{{ route("notifications.mark-all-read") }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-          });
-          
-          // Update local state
-          this.notifications.forEach(notification => {
-            notification.read = true;
-          });
-          this.unreadCount = 0;
-        } catch (error) {
-          console.error('Failed to mark all notifications as read:', error);
-        }
-      },
+        async markAllAsRead() {
+          try {
+            await fetch('{{ route("notifications.mark-all-read") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              }
+            });
+            
+            // Update local state
+            this.notifications.forEach(notification => {
+              notification.read = true;
+            });
+            this.unreadCount = 0;
+          } catch (error) {
+            console.error('Failed to mark all notifications as read:', error);
+          }
+        },
       
-      async clearAllNotifications() {
-        // Show confirmation dialog
-        if (!confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
-          return;
-        }
-        
-        try {
-          await fetch('{{ route("notifications.clear-all") }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-          });
+        async clearAllNotifications() {
+          // Show confirmation dialog
+          if (!confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+            return;
+          }
           
-          // Update local state
-          this.notifications = [];
-          this.unreadCount = 0;
-          this.open = false; // Close dropdown
-          
-          // Show success message
-          this.showToast('All notifications cleared successfully', 'success');
-        } catch (error) {
-          console.error('Failed to clear all notifications:', error);
-          this.showToast('Failed to clear notifications', 'error');
-        }
-      },
+          try {
+            await fetch('{{ route("notifications.clear-all") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              }
+            });
+            
+            // Update local state
+            this.notifications = [];
+            this.unreadCount = 0;
+            this.open = false; // Close dropdown
+            
+            // Show success message
+            this.showToast('All notifications cleared successfully', 'success');
+          } catch (error) {
+            console.error('Failed to clear all notifications:', error);
+            this.showToast('Failed to clear notifications', 'error');
+          }
+        },
       
-      showToast(message, type = 'info') {
-        // Create toast notification
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-        
-        const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
-        toast.className += ` ${bgColor} text-white`;
-        
-        const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
-        
-        toast.innerHTML = `
-          <div class="flex items-center gap-2">
-            <i class="${icon}"></i>
-            <span>${message}</span>
-          </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        // Animate in
-        setTimeout(() => {
-          toast.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-          toast.classList.add('translate-x-full');
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      }
-    }))
+        showToast(message, type = 'info') {
+          // Create toast notification
+          const toast = document.createElement('div');
+          toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+          
+          const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+          toast.className += ` ${bgColor} text-white`;
+          
+          const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+          
+          toast.innerHTML = `
+            <div class="flex items-center gap-2">
+              <i class="${icon}"></i>
+              <span>${message}</span>
+            </div>
+          `;
+          
+          document.body.appendChild(toast);
+          
+          // Animate in
+          setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+          }, 100);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+      }))
     });
 
     // Smooth scrolling for anchor links

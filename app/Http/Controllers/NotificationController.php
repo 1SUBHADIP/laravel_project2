@@ -168,6 +168,19 @@ class NotificationController extends Controller
     {
         $notifications = [];
 
+        // Keep one persistent system notification so the admin UI always has a visible item.
+        $notifications[] = [
+            'id' => 'system_status_active',
+            'type' => 'info',
+            'title' => 'Notification Center Active',
+            'message' => 'Notifications are working. New alerts will appear here automatically.',
+            'time' => 'Now',
+            'icon' => 'fas fa-bell',
+            'color' => 'text-blue-400',
+            'action_url' => route('notifications.view-all'),
+            'read' => false,
+        ];
+
         // Low stock books (less than 3 available copies)
         $lowStockBooks = Book::whereRaw('available_copies < 3 AND available_copies > 0')
             ->orderBy('available_copies', 'asc')

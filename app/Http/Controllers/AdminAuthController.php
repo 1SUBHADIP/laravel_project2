@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Passwords\PasswordBroker;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
+use RuntimeException;
 use Throwable;
 
 class AdminAuthController extends Controller
@@ -18,7 +21,7 @@ class AdminAuthController extends Controller
     public function showLogin()
     {
         // Redirect to dashboard if already logged in
-        if (session()->has('admin_id')) {
+        if (session()->has('admin_id') || Auth::check()) {
             return redirect()->route('dashboard');
         }
 
@@ -30,7 +33,6 @@ class AdminAuthController extends Controller
         $data = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'remember' => ['nullable', 'boolean'],
         ]);
 
         try {
@@ -55,8 +57,25 @@ class AdminAuthController extends Controller
                     ->withInput($request->only('email', 'remember'));
             }
 
-            // Verify password
-            if (!Hash::check($data['password'], $user->password)) {
+            // Verify password. If a legacy non-bcrypt password is detected,
+            // allow one-time login with exact match and upgrade it to a hash.
+            $passwordVerified = false;
+
+            try {
+                $passwordVerified = Hash::check($data['password'], $user->password);
+            } catch (RuntimeException $e) {
+                if (hash_equals((string) $user->password, (string) $data['password'])) {
+                    $passwordVerified = true;
+                    $user->password = Hash::make($data['password']);
+                    $user->save();
+                } else {
+                    Log::warning('Legacy password check failed for admin login.', [
+                        'email' => $data['email'],
+                    ]);
+                }
+            }
+
+            if (!$passwordVerified) {
                 return back()
                     ->withErrors(['password' => 'The password you entered is incorrect.'])
                     ->withInput($request->only('email', 'remember'));
@@ -64,17 +83,14 @@ class AdminAuthController extends Controller
 
             // Set session data
             $request->session()->regenerate();
+            Auth::login($user, $request->boolean('remember'));
+
             $request->session()->put([
                 'admin_id' => $user->id,
                 'admin_name' => $user->name,
                 'admin_email' => $user->email,
                 'login_time' => now(),
             ]);
-
-            // Handle remember me functionality
-            if ($data['remember'] ?? false) {
-                $request->session()->put('admin_remember', true);
-            }
 
             return redirect()->intended(route('dashboard'))
                 ->with('success', 'Welcome back, ' . $user->name . '!');
@@ -88,7 +104,7 @@ class AdminAuthController extends Controller
 
     public function showForgotPassword(): View|RedirectResponse
     {
-        if (session()->has('admin_id')) {
+        if (session()->has('admin_id') || Auth::check()) {
             return redirect()->route('dashboard');
         }
 
@@ -125,14 +141,8 @@ class AdminAuthController extends Controller
             return back()->with('status', 'If your administrator account exists, a password reset link has been sent.');
         }
 
+        /** @var PasswordBroker $broker */
         $broker = Password::broker();
-        if ($broker->recentlyCreatedToken($user)) {
-            $waitSeconds = (int) config('auth.passwords.users.throttle', 60);
-
-            return back()->withErrors([
-                'email' => "Please wait {$waitSeconds} seconds before retrying password reset.",
-            ])->withInput($request->only('email'));
-        }
 
         $token = $broker->createToken($user);
         $resetLink = url('/admin/reset-password/' . $token . '?email=' . urlencode($user->email));
@@ -158,7 +168,7 @@ class AdminAuthController extends Controller
 
     public function showResetPassword(string $token, Request $request): View|RedirectResponse
     {
-        if (session()->has('admin_id')) {
+        if (session()->has('admin_id') || Auth::check()) {
             return redirect()->route('dashboard');
         }
 
@@ -211,8 +221,10 @@ class AdminAuthController extends Controller
     {
         $adminName = $request->session()->get('admin_name', 'Admin');
 
-        $request->session()->forget(['admin_id', 'admin_name', 'admin_remember']);
+        Auth::logout();
+        $request->session()->forget(['admin_id', 'admin_name', 'admin_email', 'login_time']);
         $request->session()->flush();
+        $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')
             ->with('success', 'You have been successfully logged out. See you next time, ' . $adminName . '!');
