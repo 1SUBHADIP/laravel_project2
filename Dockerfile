@@ -10,7 +10,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
+# Install dependencies
 RUN composer install
+
+# Create MySQL DB (easy solution)
+RUN touch database/database.mysql
+
+# Set permissions
+RUN chmod -R 777 storage bootstrap/cache database
+
+# Run migration automatically
+RUN php artisan migrate --force
 
 EXPOSE 10000
 
