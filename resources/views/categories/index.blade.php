@@ -64,7 +64,7 @@
   
   @if($categories->count() > 0)
     <div class="overflow-x-auto">
-      <table class="w-full">
+      <table class="min-w-[900px] w-full">
         <thead class="bg-slate-800/50">
           <tr>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">

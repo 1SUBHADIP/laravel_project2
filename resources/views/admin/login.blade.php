@@ -126,7 +126,7 @@
                      class="w-4 h-4 text-primary bg-slate-800 border-slate-700 rounded focus:ring-primary/20 focus:ring-2">
               <span class="ml-2 text-sm text-slate-300">Remember me</span>
             </label>
-            <a href="#" class="text-sm text-primary hover:text-primary-600 transition-colors">
+            <a href="{{ route('admin.password.request') }}" class="text-sm text-primary hover:text-primary-600 transition-colors">
               Forgot password?
             </a>
           </div>

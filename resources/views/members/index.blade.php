@@ -1,15 +1,15 @@
 @extends('layout')
 
 @section('title', 'Members')
+@section('breadcrumb', 'Members')
 
 @section('content')
-<div class="flex items-center justify-between mb-4">
-  <div></div>
+<div class="flex items-center justify-end mb-4">
   <a href="{{ route('members.create') }}" class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">Add Member</a>
 </div>
 
-<div class="overflow-hidden rounded-lg border border-slate-800">
-  <table class="min-w-full divide-y divide-slate-800">
+<div class="overflow-x-auto rounded-lg border border-slate-800">
+  <table class="w-full min-w-[980px] divide-y divide-slate-800">
     <thead class="bg-slate-900/60">
       <tr>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Name</th>
@@ -30,7 +30,7 @@
           <td class="px-4 py-3">
             @if($member->department)
               <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                {{ $member->department }}
+                {{ $member->department->name }}
               </span>
             @else
               <span class="text-sm text-slate-400">N/A</span>

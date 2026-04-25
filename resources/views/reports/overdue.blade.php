@@ -5,10 +5,10 @@
 
 @section('content')
 <!-- Header -->
-<div class="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-xl p-6 mb-8">
+<div class="bg-linear-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-xl p-6 mb-8">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
+      <div class="w-12 h-12 bg-linear-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
         <i class="fas fa-exclamation-triangle text-white text-xl"></i>
       </div>
       <div>
@@ -131,11 +131,11 @@
       Overdue Items List
     </h3>
     <div class="flex items-center gap-3">
-      <button onclick="sendReminders()" 
+      <button type="button" onclick="sendReminders(this)" 
               class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
         <i class="fas fa-envelope mr-2"></i>Send Reminders
       </button>
-      <button onclick="exportOverdue()" 
+      <button type="button" onclick="exportOverdue(this)" 
               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
         <i class="fas fa-download mr-2"></i>Export
       </button>
@@ -144,7 +144,7 @@
   
   @if($overdueLoans->count() > 0)
     <div class="overflow-x-auto">
-      <table class="w-full">
+      <table class="min-w-[1200px] w-full">
         <thead>
           <tr class="border-b border-slate-700">
             <th class="text-left py-3 px-4 text-slate-300 font-medium">Member</th>
@@ -210,11 +210,11 @@
               </td>
               <td class="py-4 px-4">
                 <div class="flex items-center gap-2">
-                  <button onclick="sendReminder({{ $loan->id }})" 
+                  <button type="button" onclick="sendReminder({{ $loan->id }}, this)" 
                           class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
                     <i class="fas fa-envelope mr-1"></i>Remind
                   </button>
-                  <button onclick="markReturned({{ $loan->id }})" 
+                  <button type="button" onclick="markReturned({{ $loan->id }}, this)" 
                           class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">
                     <i class="fas fa-check mr-1"></i>Return
                   </button>
@@ -255,10 +255,13 @@ function applyFilters() {
   window.location.href = '{{ route("reports.overdue") }}?' + params.toString();
 }
 
-function sendReminder(loanId) {
+function sendReminder(loanId, button) {
   if (confirm('Send reminder email and SMS to member?')) {
-    // Show loading state
-    const button = event.target;
+    button = button || null;
+    if (!button) {
+      return;
+    }
+
     const originalText = button.innerHTML;
     button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
     button.disabled = true;
@@ -268,16 +271,26 @@ function sendReminder(loanId) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
-    .then(response => response.json())
+    .then(async response => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Failed to send reminder');
+      }
+
+      return payload;
+    })
     .then(data => {
       button.innerHTML = originalText;
       button.disabled = false;
       
       if (data.success) {
         showNotification(data.message, 'success');
+        setTimeout(() => window.location.reload(), 800);
       } else {
         showNotification(data.message || 'Failed to send reminder', 'error');
       }
@@ -290,9 +303,13 @@ function sendReminder(loanId) {
   }
 }
 
-function sendReminders() {
+function sendReminders(button) {
   if (confirm('Send reminder emails and SMS to all members with overdue items?')) {
-    const button = event.target;
+    button = button || null;
+    if (!button) {
+      return;
+    }
+
     const originalText = button.innerHTML;
     button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
     button.disabled = true;
@@ -302,10 +319,19 @@ function sendReminders() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
-    .then(response => response.json())
+    .then(async response => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Failed to send reminders');
+      }
+
+      return payload;
+    })
     .then(data => {
       button.innerHTML = originalText;
       button.disabled = false;
@@ -328,7 +354,7 @@ function sendReminders() {
   }
 }
 
-function markReturned(loanId) {
+function markReturned(loanId, button) {
   if (confirm('Mark this item as returned?')) {
     // This would typically make an AJAX call to update the loan
     fetch(`/loans/${loanId}/return`, {
@@ -338,7 +364,15 @@ function markReturned(loanId) {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
-    .then(response => response.json())
+    .then(async response => {
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Error processing request.');
+      }
+
+      return payload;
+    })
     .then(data => {
       if (data.success) {
         showNotification('Item marked as returned!', 'success');
@@ -355,8 +389,12 @@ function markReturned(loanId) {
   }
 }
 
-function exportOverdue() {
-  const button = event.target;
+function exportOverdue(button) {
+  button = button || null;
+  if (!button) {
+    return;
+  }
+
   const originalText = button.innerHTML;
   button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exporting...';
   button.disabled = true;

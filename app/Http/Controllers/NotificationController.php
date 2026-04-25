@@ -47,6 +47,32 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function viewAll()
+    {
+        // Generate current notifications and save them to database
+        $this->generateAndSaveNotifications();
+
+        $notifications = DB::table('notifications')
+            ->where('is_dismissed', false)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->through(function ($notification) {
+                return [
+                    'id' => $notification->notification_id,
+                    'type' => $notification->type,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'time' => Carbon::parse($notification->created_at)->diffForHumans(),
+                    'icon' => $notification->icon,
+                    'color' => $notification->color,
+                    'action_url' => $notification->action_url,
+                    'read' => (bool) $notification->is_read
+                ];
+            });
+
+        return view('notifications.index', compact('notifications'));
+    }
+
     public function markAsRead(Request $request)
     {
         $notificationId = $request->input('id');
@@ -55,24 +81,36 @@ class NotificationController extends Controller
             ->where('notification_id', $notificationId)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
+        if (!$request->wantsJson() && !$request->ajax()) {
+            return back()->with('success', 'Notification marked as read.');
+        }
+
         return response()->json(['success' => true]);
     }
 
-    public function markAllAsRead()
+    public function markAllAsRead(Request $request)
     {
         DB::table('notifications')
             ->where('is_dismissed', false)
             ->update(['is_read' => true, 'updated_at' => now()]);
 
+        if (!$request->wantsJson() && !$request->ajax()) {
+            return back()->with('success', 'All notifications marked as read.');
+        }
+
         return response()->json(['success' => true]);
     }
 
-    public function clearAll()
+    public function clearAll(Request $request)
     {
         // Mark all active notifications as dismissed
         DB::table('notifications')
             ->where('is_dismissed', false)
             ->update(['is_dismissed' => true, 'updated_at' => now()]);
+
+        if (!$request->wantsJson() && !$request->ajax()) {
+            return back()->with('success', 'All notifications cleared successfully');
+        }
 
         return response()->json([
             'success' => true,

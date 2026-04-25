@@ -5,9 +5,9 @@
 
 @section('content')
 <!-- Reports Header -->
-<div class="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-6 mb-8">
+<div class="bg-linear-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-6 mb-8">
   <div class="flex items-center gap-4">
-    <div class="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+    <div class="w-12 h-12 bg-linear-to-br from-primary to-accent rounded-xl flex items-center justify-center">
       <i class="fas fa-chart-bar text-white text-xl"></i>
     </div>
     <div>
@@ -296,30 +296,37 @@
 
 <script>
 function generateReport() {
-  // Show loading state
   const button = event.target;
   const originalText = button.innerHTML;
   button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
-  button.disabled = true;
-  
-  // Simulate report generation
-  setTimeout(() => {
-    button.innerHTML = originalText;
-    button.disabled = false;
-    
-    // Show success notification
-    showNotification('Report generated successfully!', 'success');
-  }, 2000);
+
+  const periodSelect = document.querySelector('#reportFilter select');
+  const period = periodSelect ? periodSelect.value : 'month';
+
+  fetch(`{{ route('reports.analytics') }}?period=${encodeURIComponent(period)}`, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(() => {
+      showNotification('Report generated successfully!', 'success');
+    })
+    .catch(() => {
+      showNotification('Failed to generate report.', 'error');
+    })
+    .finally(() => {
+      button.innerHTML = originalText;
+    });
 }
 
 function exportReport(format) {
-  // Show loading notification
-  showNotification(`Preparing ${format.toUpperCase()} export...`, 'info');
-  
-  // Simulate export
-  setTimeout(() => {
-    showNotification(`${format.toUpperCase()} report exported successfully!`, 'success');
-  }, 1500);
+  const url = new URL('{{ route("reports.export") }}', window.location.origin);
+  url.searchParams.set('type', 'loans');
+  url.searchParams.set('format', format);
+
+  window.location.href = url.toString();
 }
 
 function showNotification(message, type = 'info') {

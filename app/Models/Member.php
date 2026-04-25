@@ -15,12 +15,17 @@ class Member extends Model
         'email',
         'phone',
         'address',
-        'department',
+        'department_id',
         'student_id',
         'membership_type',
         'membership_date',
         'status',
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function loans(): HasMany
     {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Loan;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SmsService
@@ -44,17 +45,35 @@ class SmsService
     private function sendSms($phoneNumber, $message)
     {
         try {
-            // Simulate SMS sending
-            Log::info("SMS sent to {$phoneNumber}: {$message}");
+            $twilioSid = config('services.twilio.sid');
+            $twilioToken = config('services.twilio.token');
+            $twilioFrom = config('services.twilio.from');
 
-            // In production, you would use something like:
-            // $twilio = new Client($accountSid, $authToken);
-            // $twilio->messages->create($phoneNumber, [
-            //     'from' => '+1234567890',
-            //     'body' => $message
-            // ]);
+            if (empty($twilioSid) || empty($twilioToken) || empty($twilioFrom)) {
+                Log::warning('SMS delivery is not configured. Set TWILIO_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER.');
+                return false;
+            }
 
-            return true;
+            $response = Http::withBasicAuth($twilioSid, $twilioToken)
+                ->asForm()
+                ->post("https://api.twilio.com/2010-04-01/Accounts/{$twilioSid}/Messages.json", [
+                    'From' => $twilioFrom,
+                    'To' => $phoneNumber,
+                    'Body' => $message,
+                ]);
+
+            if ($response->successful()) {
+                Log::info("SMS sent to {$phoneNumber}");
+                return true;
+            }
+
+            Log::error('Failed to send SMS', [
+                'phone' => $phoneNumber,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
         } catch (\Exception $e) {
             Log::error("Failed to send SMS to {$phoneNumber}: " . $e->getMessage());
             return false;

@@ -76,4 +76,17 @@ class LoanController extends Controller
 
         return redirect()->route('loans.index')->with('status', 'Book returned');
     }
+
+    public function destroy(Loan $loan): RedirectResponse
+    {
+        if ($loan->returned_date === null) {
+            return back()->withErrors([
+                'loan' => 'Only completed (returned) loans can be deleted.',
+            ]);
+        }
+
+        $loan->delete();
+
+        return redirect()->route('loans.index')->with('status', 'Completed loan deleted');
+    }
 }

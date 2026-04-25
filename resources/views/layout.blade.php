@@ -37,11 +37,13 @@
       <div class="flex h-16 items-center justify-between">
         <!-- Logo and Brand -->
         <div class="flex items-center gap-4">
-          <button id="sidebarToggle" class="lg:hidden p-2 rounded-md hover:bg-slate-700">
-            <i class="fas fa-bars text-slate-300"></i>
+          <button id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-expanded="false" class="p-2 rounded-md hover:bg-slate-700 transition-colors">
+            <span class="hamburger-line block w-5 h-0.5 bg-slate-300 rounded transition-all duration-300"></span>
+            <span class="hamburger-line block w-5 h-0.5 bg-slate-300 rounded mt-1 transition-all duration-300"></span>
+            <span class="hamburger-line block w-5 h-0.5 bg-slate-300 rounded mt-1 transition-all duration-300"></span>
           </button>
           <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+            <div class="w-8 h-8 bg-linear-to-br from-primary to-accent rounded-lg flex items-center justify-center">
               <i class="fas fa-book text-white text-sm"></i>
             </div>
             <span class="font-bold text-xl tracking-wide text-white hidden sm:block">CCLMS</span>
@@ -132,7 +134,7 @@
               <i class="fas fa-bell text-slate-300"></i>
               <span x-show="unreadCount > 0" 
                     x-text="unreadCount" 
-                    class="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white px-1"></span>
+                    class="absolute -top-1 -right-1 min-w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white px-1"></span>
             </button>
             
             <!-- Notifications Dropdown -->
@@ -168,7 +170,7 @@
                        class="px-4 py-3 border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer transition-colors"
                        :class="{ 'bg-slate-800/30': !notification.read }">
                     <div class="flex items-start gap-3">
-                      <div class="flex-shrink-0 mt-1">
+                      <div class="shrink-0 mt-1">
                         <i :class="notification.icon + ' ' + notification.color"></i>
                       </div>
                       <div class="flex-1 min-w-0">
@@ -176,7 +178,7 @@
                         <p class="text-xs text-slate-400 mt-1" x-text="notification.message"></p>
                         <p class="text-xs text-slate-500 mt-1" x-text="notification.time"></p>
                       </div>
-                      <div x-show="!notification.read" class="w-2 h-2 bg-accent rounded-full flex-shrink-0 mt-2"></div>
+                      <div x-show="!notification.read" class="w-2 h-2 bg-accent rounded-full shrink-0 mt-2"></div>
                     </div>
                   </div>
                 </template>
@@ -184,7 +186,7 @@
               
               <!-- Footer -->
               <div class="px-4 py-3 border-t border-slate-700 bg-slate-800/30 flex items-center justify-between">
-                <a href="#" class="text-xs text-accent hover:text-accent-light">View all notifications</a>
+                <a href="{{ route('notifications.view-all') }}" class="text-xs text-accent hover:text-accent-light">View all notifications</a>
                 <button @click="clearAllNotifications()" 
                         x-show="notifications.length > 0"
                         class="text-xs text-red-400 hover:text-red-300 transition-colors">
@@ -197,7 +199,7 @@
           <!-- User Profile -->
           <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-700 transition-colors">
-              <div class="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 bg-linear-to-br from-primary to-accent rounded-full flex items-center justify-center">
                 <i class="fas fa-user text-white text-sm"></i>
               </div>
               <span class="hidden sm:block text-sm text-slate-300">{{ session('admin_name', 'Admin') }}</span>
@@ -258,8 +260,8 @@
   </nav>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-16 left-0 z-40 w-64 h-screen bg-sidebar border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
-    <div class="px-4 py-6">
+  <aside id="sidebar" class="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] overflow-y-auto bg-sidebar border-r border-slate-800 transform -translate-x-full transition-transform duration-300 ease-in-out">
+    <div class="px-4 py-6 pb-10">
       <!-- Quick Stats -->
       <div class="mb-6">
         <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick Overview</h3>
@@ -285,33 +287,39 @@
           <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Main Menu</h3>
           <ul class="space-y-1">
             <li>
-              <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors {{ request()->routeIs('dashboard') ? 'bg-primary/20 text-primary border-r-2 border-primary' : 'text-slate-300' }}">
+              <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('dashboard') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-home w-5"></i>
                 <span>Dashboard</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('books.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors {{ request()->routeIs('books.*') ? 'bg-primary/20 text-primary border-r-2 border-primary' : 'text-slate-300' }}">
+              <a href="{{ route('books.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('books.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-book w-5"></i>
                 <span>Books</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('members.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors {{ request()->routeIs('members.*') ? 'bg-primary/20 text-primary border-r-2 border-primary' : 'text-slate-300' }}">
+              <a href="{{ route('members.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('members.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-users w-5"></i>
                 <span>Members</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('loans.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors {{ request()->routeIs('loans.*') ? 'bg-primary/20 text-primary border-r-2 border-primary' : 'text-slate-300' }}">
+              <a href="{{ route('loans.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('loans.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-exchange-alt w-5"></i>
                 <span>Loans</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('categories.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors {{ request()->routeIs('categories.*') ? 'bg-primary/20 text-primary border-r-2 border-primary' : 'text-slate-300' }}">
+              <a href="{{ route('categories.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('categories.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-tags w-5"></i>
                 <span>Categories</span>
+              </a>
+            </li>
+            <li>
+              <a href="{{ route('departments.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('departments.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
+                <i class="fas fa-building w-5"></i>
+                <span>Departments</span>
               </a>
             </li>
           </ul>
@@ -321,19 +329,19 @@
           <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Reports & Analytics</h3>
           <ul class="space-y-1">
             <li>
-              <a href="{{ route('reports.analytics') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+              <a href="{{ route('reports.analytics') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('reports.analytics') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-chart-bar w-5"></i>
                 <span>Analytics</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+              <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('reports.index') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-file-alt w-5"></i>
                 <span>Reports</span>
               </a>
             </li>
             <li>
-              <a href="{{ route('reports.overdue') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+              <a href="{{ route('reports.overdue') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('reports.overdue') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-exclamation-triangle w-5"></i>
                 <span>Overdue Items</span>
               </a>
@@ -345,7 +353,7 @@
           <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Account</h3>
           <ul class="space-y-1">
             <li>
-              <a href="{{ route('settings.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+              <a href="{{ route('settings.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('settings.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-cog w-5"></i>
                 <span>Settings</span>
               </a>
@@ -368,7 +376,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="lg:ml-64 pt-16 min-h-screen">
+  <main class="pt-16 min-h-screen">
     <!-- Mobile Search Bar -->
     <div class="md:hidden bg-card border-b border-slate-800 p-4">
       <form action="{{ route('search') }}" method="GET" class="relative">
@@ -383,7 +391,7 @@
     </div>
 
     <!-- Page Header -->
-    <div class="bg-card/30 border-b border-slate-800 px-6 py-4">
+    <div class="bg-card/30 border-b border-slate-800 px-4 sm:px-6 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_12px_rgba(57,211,83,0.8)]"></span>
@@ -391,24 +399,24 @@
         </div>
         
         <!-- Breadcrumb -->
-        <nav class="hidden sm:flex" aria-label="Breadcrumb">
-          <ol class="flex items-center space-x-2 text-sm">
-            <li>
-              <a href="{{ route('dashboard') }}" class="text-slate-400 hover:text-white">
-                <i class="fas fa-home"></i>
-              </a>
-            </li>
-            @hasSection('breadcrumb')
+        @hasSection('breadcrumb')
+          <nav class="hidden sm:flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm">
+              <li>
+                <a href="{{ route('dashboard') }}" class="text-slate-400 hover:text-white">
+                  <i class="fas fa-home"></i>
+                </a>
+              </li>
               <li class="text-slate-600">/</li>
               <li class="text-slate-300">@yield('breadcrumb')</li>
-            @endif
-          </ol>
-        </nav>
+            </ol>
+          </nav>
+        @endif
       </div>
     </div>
 
     <!-- Content Area -->
-    <div class="p-6">
+    <div class="p-4 sm:p-6">
       <!-- Alert Messages -->
       @if(session('status'))
         <div class="mb-6 rounded-lg border border-emerald-700 bg-emerald-900/40 px-4 py-3 text-emerald-200 flex items-center gap-3">
@@ -454,7 +462,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="lg:ml-64 border-t border-slate-800 bg-card/30">
+  <footer class="border-t border-slate-800 bg-card/30">
     <div class="px-6 py-4">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -519,24 +527,54 @@
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
+    const hamburgerLines = sidebarToggle?.querySelectorAll('.hamburger-line') ?? [];
+
+    function setHamburgerState(isOpen) {
+      if (!sidebarToggle || hamburgerLines.length < 3) {
+        return;
+      }
+
+      sidebarToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+      if (isOpen) {
+        hamburgerLines[0].style.transform = 'translateY(6px) rotate(45deg)';
+        hamburgerLines[1].style.opacity = '0';
+        hamburgerLines[2].style.transform = 'translateY(-6px) rotate(-45deg)';
+      } else {
+        hamburgerLines[0].style.transform = 'none';
+        hamburgerLines[1].style.opacity = '1';
+        hamburgerLines[2].style.transform = 'none';
+      }
+    }
 
     function toggleSidebar() {
       sidebar.classList.toggle('-translate-x-full');
       overlay.classList.toggle('opacity-0');
       overlay.classList.toggle('pointer-events-none');
+      document.body.classList.toggle('overflow-hidden');
+
+      setHamburgerState(!sidebar.classList.contains('-translate-x-full'));
     }
 
     sidebarToggle?.addEventListener('click', toggleSidebar);
     overlay?.addEventListener('click', toggleSidebar);
+    setHamburgerState(false);
 
     // Close sidebar when clicking on a link (mobile only)
     const sidebarLinks = sidebar?.querySelectorAll('a');
     sidebarLinks?.forEach(link => {
       link.addEventListener('click', () => {
-        if (window.innerWidth < 1024) {
+        if (!sidebar.classList.contains('-translate-x-full')) {
           toggleSidebar();
         }
       });
+    });
+
+    window.addEventListener('resize', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      document.body.classList.remove('overflow-hidden');
+      setHamburgerState(false);
     });
 
     // Auto-hide alerts after 5 seconds

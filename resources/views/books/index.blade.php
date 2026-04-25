@@ -1,10 +1,10 @@
 @extends('layout')
 
 @section('title', 'Books')
+@section('breadcrumb', 'Books')
 
 @section('content')
-<div class="flex items-center justify-between mb-4">
-  <div></div>
+<div class="flex items-center justify-end mb-4">
   <a href="{{ route('books.create') }}" class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">Add Book</a>
 </div>
 
@@ -23,8 +23,8 @@
   </div>
 </form>
 
-<div class="overflow-hidden rounded-lg border border-slate-800">
-  <table class="min-w-full divide-y divide-slate-800">
+<div class="overflow-x-auto rounded-lg border border-slate-800">
+  <table class="w-full min-w-[880px] divide-y divide-slate-800">
     <thead class="bg-slate-900/60">
       <tr>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Title</th>

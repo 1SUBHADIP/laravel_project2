@@ -1,9 +1,10 @@
 @extends('layout')
 
 @section('title', 'New Loan')
+@section('breadcrumb', 'Loans / New')
 
 @section('content')
-<form action="{{ route('loans.store') }}" method="POST" class="mt-3 space-y-4">
+<form action="{{ route('loans.store') }}" method="POST" class="mt-3 space-y-4 max-w-4xl">
   @csrf
   <div>
     <label class="block text-sm text-slate-300 mb-1">Book</label>

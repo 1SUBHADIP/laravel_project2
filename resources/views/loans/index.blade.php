@@ -1,15 +1,15 @@
 @extends('layout')
 
 @section('title', 'Loans')
+@section('breadcrumb', 'Loans')
 
 @section('content')
-<div class="flex items-center justify-between mb-4">
-  <div></div>
+<div class="flex items-center justify-end mb-4">
   <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">New Loan</a>
 </div>
 
-<div class="overflow-hidden rounded-lg border border-slate-800">
-  <table class="min-w-full divide-y divide-slate-800">
+<div class="overflow-x-auto rounded-lg border border-slate-800">
+  <table class="w-full min-w-[1100px] divide-y divide-slate-800">
     <thead class="bg-slate-900/60">
       <tr>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Book</th>
@@ -50,7 +50,14 @@
             <button class="inline-flex items-center rounded-md border border-emerald-700 text-emerald-300 px-2 py-1 text-xs hover:bg-emerald-900/30">Mark Returned</button>
           </form>
           @else
-          <span class="text-slate-400 text-xs">Completed</span>
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 text-xs">Completed</span>
+            <form action="{{ route('loans.destroy', $loan) }}" method="POST" class="inline" onsubmit="return confirm('Delete this completed loan record? This cannot be undone.');">
+              @csrf
+              @method('DELETE')
+              <button type="submit" class="inline-flex items-center rounded-md border border-rose-700 text-rose-300 px-2 py-1 text-xs hover:bg-rose-900/30">Delete</button>
+            </form>
+          </div>
           @endif
         </td>
       </tr>

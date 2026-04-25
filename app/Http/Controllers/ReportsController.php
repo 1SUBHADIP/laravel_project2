@@ -8,6 +8,7 @@ use App\Models\Book;
 use App\Models\Member;
 use App\Models\Category;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OverdueReminder;
@@ -164,19 +165,26 @@ class ReportsController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type', 'loans');
-        $format = $request->get('format', 'csv');
+        $data = $request->validate([
+            'type' => ['nullable', 'in:loans,overdue,popular_books,member_activity'],
+            'format' => ['nullable', 'in:pdf,excel,csv'],
+        ]);
 
-        switch ($type) {
-            case 'overdue':
-                return $this->exportOverdueItems($format);
-            case 'popular_books':
-                return $this->exportPopularBooks($format);
-            case 'member_activity':
-                return $this->exportMemberActivity($format);
-            default:
-                return $this->exportLoanHistory($format);
-        }
+        $type = $data['type'] ?? 'loans';
+        $format = $data['format'] ?? 'csv';
+
+        $export = match ($type) {
+            'overdue' => $this->buildOverdueItemsExport(),
+            'popular_books' => $this->buildPopularBooksExport(),
+            'member_activity' => $this->buildMemberActivityExport(),
+            default => $this->buildLoanHistoryExport(),
+        };
+
+        return match ($format) {
+            'pdf' => $this->downloadPdf($export),
+            'excel' => $this->downloadExcel($export),
+            default => $this->downloadCsv($export),
+        };
     }
 
     private function getAverageLoanDuration($startDate)
@@ -200,7 +208,7 @@ class ReportsController extends Controller
         return $mostActiveDay->day_name ?? 'N/A';
     }
 
-    private function exportOverdueItems($format)
+    private function buildOverdueItemsExport(): array
     {
         $overdueLoans = Loan::whereNull('returned_date')
             ->where('due_date', '<', now())
@@ -220,10 +228,15 @@ class ReportsController extends Controller
             ];
         });
 
-        return $this->downloadData($data, 'overdue_items', $format);
+        return [
+            'title' => 'Overdue Items',
+            'filename' => 'overdue_items',
+            'columns' => ['Member Name', 'Member Email', 'Book Title', 'Book Author', 'Loan Date', 'Due Date', 'Days Overdue'],
+            'rows' => $data->toArray(),
+        ];
     }
 
-    private function exportPopularBooks($format)
+    private function buildPopularBooksExport(): array
     {
         $books = Book::withCount('loans')
             ->orderBy('loans_count', 'desc')
@@ -240,10 +253,15 @@ class ReportsController extends Controller
             ];
         });
 
-        return $this->downloadData($data, 'popular_books', $format);
+        return [
+            'title' => 'Popular Books',
+            'filename' => 'popular_books',
+            'columns' => ['Title', 'Author', 'ISBN', 'Total Copies', 'Available Copies', 'Total Loans'],
+            'rows' => $data->toArray(),
+        ];
     }
 
-    private function exportMemberActivity($format)
+    private function buildMemberActivityExport(): array
     {
         $members = Member::withCount('loans')
             ->orderBy('loans_count', 'desc')
@@ -259,10 +277,15 @@ class ReportsController extends Controller
             ];
         });
 
-        return $this->downloadData($data, 'member_activity', $format);
+        return [
+            'title' => 'Member Activity',
+            'filename' => 'member_activity',
+            'columns' => ['Name', 'Email', 'Phone', 'Member Since', 'Total Loans'],
+            'rows' => $data->toArray(),
+        ];
     }
 
-    private function exportLoanHistory($format)
+    private function buildLoanHistoryExport(): array
     {
         $loans = Loan::with(['book', 'member'])
             ->orderBy('loan_date', 'desc')
@@ -279,41 +302,62 @@ class ReportsController extends Controller
             ];
         });
 
-        return $this->downloadData($data, 'loan_history', $format);
+        return [
+            'title' => 'Loan History',
+            'filename' => 'loan_history',
+            'columns' => ['Member Name', 'Book Title', 'Loan Date', 'Due Date', 'Return Date', 'Status'],
+            'rows' => $data->toArray(),
+        ];
     }
 
-    private function downloadData($data, $filename, $format)
+    private function downloadCsv(array $export)
     {
-        $filename = $filename . '_' . now()->format('Y-m-d_H-i-s');
+        $filename = $export['filename'] . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
-            ];
+        return response()->streamDownload(function () use ($export) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $export['columns']);
 
-            $callback = function () use ($data) {
-                $file = fopen('php://output', 'w');
+            foreach ($export['rows'] as $row) {
+                fputcsv($file, $this->rowValuesForColumns($row, $export['columns']));
+            }
 
-                if (!empty($data)) {
-                    fputcsv($file, array_keys($data->first()));
-                    foreach ($data as $row) {
-                        fputcsv($file, $row);
-                    }
-                }
-
-                fclose($file);
-            };
-
-            return response()->stream($callback, 200, $headers);
-        }
-
-        // For now, return JSON for other formats
-        return response()->json([
-            'success' => true,
-            'message' => 'Export functionality will be implemented for ' . strtoupper($format) . ' format',
-            'data' => $data
+            fclose($file);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    private function downloadExcel(array $export)
+    {
+        $filename = $export['filename'] . '_' . now()->format('Y-m-d_H-i-s') . '.xls';
+        $html = view('reports.export', [
+            'export' => $export,
+        ])->render();
+
+        return response()->streamDownload(function () use ($html) {
+            echo $html;
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+        ]);
+    }
+
+    private function downloadPdf(array $export)
+    {
+        $filename = $export['filename'] . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+
+        $pdf = Pdf::loadView('reports.export', [
+            'export' => $export,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($filename);
+    }
+
+    private function rowValuesForColumns(array $row, array $columns): array
+    {
+        return array_map(function ($column) use ($row) {
+            return $row[$column] ?? '';
+        }, $columns);
     }
 
     /**
