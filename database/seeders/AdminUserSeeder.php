@@ -28,11 +28,11 @@ class AdminUserSeeder extends Seeder
 
         // Create a test admin user
         User::updateOrCreate(
-            ['email' => 'test@cclms.com'],
+            ['email' => 'nayaksubhadip741@gmail.com'],
             [
-                'name' => 'Test Admin',
-                'email' => 'test@cclms.com',
-                'password' => Hash::make('password'),
+                'name' => 'Admin',
+                'email' => 'nayaksubhadip741@gmail.com',
+                'password' => Hash::make('Subhadip@741'),
                 'is_admin' => true,
                 'email_verified_at' => now(),
             ]
@@ -40,6 +40,6 @@ class AdminUserSeeder extends Seeder
 
         $this->command->info('Admin users created successfully!');
         $this->command->line('Email: admin@cclms.com | Password: admin123');
-        $this->command->line('Email: test@cclms.com | Password: password');
+        $this->command->line('Email: nayaksubhadip741@gmail.com | Password: Subhadip@741');
     }
 }
