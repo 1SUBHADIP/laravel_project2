@@ -10,17 +10,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-# Install dependencies
 RUN composer install
 
-# Create SQLite DB (easy solution)
+# create sqlite db
 RUN touch database/database.sqlite
-# Set permissions
-RUN chmod -R 777 storage bootstrap/cache database
 
-# Run migration automatically
-RUN php artisan migrate --force
+# permissions
+RUN chmod -R 777 storage bootstrap/cache database
 
 EXPOSE 10000
 
-CMD php artisan serve --host=0.0.0.0 --port=10000
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=10000
