@@ -13,9 +13,8 @@ COPY . .
 # Install dependencies
 RUN composer install
 
-# Create MySQL DB (easy solution)
-RUN touch database/database.mysql
-
+# Create SQLite DB (easy solution)
+RUN touch database/database.sqlite
 # Set permissions
 RUN chmod -R 777 storage bootstrap/cache database
 
