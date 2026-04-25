@@ -20,7 +20,17 @@ RUN chmod -R 777 storage bootstrap/cache database
 
 EXPOSE 10000
 
-CMD sh -c "php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan migrate --force && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
+CMD sh -c "mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache database && \
+        chmod -R 777 storage bootstrap/cache database && \
+        if [ \"${DB_CONNECTION:-sqlite}\" = \"sqlite\" ]; then \
+            case \"${DB_DATABASE:-}\" in \
+                *.sqlite|/*) ;; \
+                *) export DB_DATABASE=/var/www/database/database.sqlite ;; \
+            esac; \
+            touch \"${DB_DATABASE}\"; \
+        fi && \
+        if [ -z \"${APP_KEY:-}\" ]; then php artisan key:generate --force; fi && \
+        php artisan config:clear && \
+        php artisan cache:clear && \
+        php artisan migrate --force && \
+        php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
