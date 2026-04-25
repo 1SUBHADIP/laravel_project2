@@ -125,13 +125,20 @@ class AdminAuthController extends Controller
             return back()->with('status', 'If your administrator account exists, a password reset link has been sent.');
         }
 
-        $token = Password::createToken($user);
+        $broker = Password::broker();
+        if ($broker->recentlyCreatedToken($user)) {
+            $waitSeconds = (int) config('auth.passwords.users.throttle', 60);
+
+            return back()->withErrors([
+                'email' => "Please wait {$waitSeconds} seconds before retrying password reset.",
+            ])->withInput($request->only('email'));
+        }
+
+        $token = $broker->createToken($user);
         $resetLink = url('/admin/reset-password/' . $token . '?email=' . urlencode($user->email));
 
         try {
-            $status = Password::broker()->sendResetLink([
-                'email' => $data['email'],
-            ]);
+            $user->sendPasswordResetNotification($token);
         } catch (Throwable $e) {
             Log::error('Failed to send admin password reset link', [
                 'email' => $data['email'],
@@ -143,24 +150,10 @@ class AdminAuthController extends Controller
             ])->withInput($request->only('email'));
         }
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return back()->with([
-                'status' => 'Password reset link prepared successfully.',
-                'reset_link' => $resetLink,
-            ]);
-        }
-
-        if ($status === Password::RESET_THROTTLED) {
-            $waitSeconds = (int) config('auth.passwords.users.throttle', 60);
-
-            return back()->withErrors([
-                'email' => "Please wait {$waitSeconds} seconds before retrying password reset.",
-            ])->withInput($request->only('email'));
-        }
-
-        return back()->withErrors([
-            'email' => __($status),
-        ])->with('reset_link', $resetLink);
+        return back()->with([
+            'status' => 'If the email server is available, a password reset link has been sent.',
+            'reset_link' => $resetLink,
+        ]);
     }
 
     public function showResetPassword(string $token, Request $request): View|RedirectResponse
