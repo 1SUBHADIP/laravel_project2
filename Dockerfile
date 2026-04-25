@@ -29,8 +29,13 @@ CMD sh -c "mkdir -p storage/framework/{cache,sessions,views} storage/logs bootst
             esac; \
             touch \"${DB_DATABASE}\"; \
         fi && \
+        export SESSION_DRIVER=${SESSION_DRIVER:-file} && \
+        export CACHE_STORE=${CACHE_STORE:-file} && \
+        export QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync} && \
+        export APP_URL=$(printf '%s' \"${APP_URL:-}\" | tr -d '\\r\\n\\t') && \
+        PORT_CLEAN=$(printf '%s' \"${PORT:-10000}\" | tr -d '\\r\\n\\t ') && \
         if [ -z \"${APP_KEY:-}\" ]; then php artisan key:generate --force; fi && \
         php artisan config:clear && \
         php artisan cache:clear && \
         php artisan migrate --force && \
-        php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
+        php -S 0.0.0.0:${PORT_CLEAN:-10000} -t public server.php"
