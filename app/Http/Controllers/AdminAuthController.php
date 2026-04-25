@@ -105,8 +105,14 @@ class AdminAuthController extends Controller
         $smtpUsername = (string) config('mail.mailers.smtp.username');
         $smtpPassword = (string) config('mail.mailers.smtp.password');
 
+        if ($defaultMailer !== 'smtp') {
+            return back()->withErrors([
+                'email' => 'Email delivery is not enabled. Set MAIL_MAILER=smtp in environment settings.',
+            ])->withInput($request->only('email'));
+        }
+
         // Prevent confusing runtime failures and throttling when SMTP is incomplete.
-        if ($defaultMailer === 'smtp' && ($smtpUsername === '' || $smtpPassword === '')) {
+        if ($smtpUsername === '' || $smtpPassword === '') {
             return back()->withErrors([
                 'email' => 'Mail is not configured. Set MAIL_USERNAME and MAIL_PASSWORD (Google App Password) in .env, then retry.',
             ])->withInput($request->only('email'));
