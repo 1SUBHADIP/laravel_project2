@@ -38,4 +38,5 @@ CMD sh -c "mkdir -p storage/framework/{cache,sessions,views} storage/logs bootst
         php artisan config:clear && \
         php artisan cache:clear && \
         php artisan migrate --force && \
+        php artisan db:seed --class=AdminUserSeeder --force && \
         php -S 0.0.0.0:${PORT_CLEAN:-10000} -t public server.php"
