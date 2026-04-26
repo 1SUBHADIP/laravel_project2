@@ -10,7 +10,7 @@
 
 <meta name="description" content="@yield('meta_description', 'Library Management System built using Laravel and PostgreSQL. Manage books, members and loans easily.')">
 
-<meta name="keywords" content="@yield('meta_keywords', 'library management system laravel, php project, college project')">
+<meta name="keywords" content="@yield('meta_keywords', 'library management system laravel, php project, college project, CCLMS Library Management System, college project ideas, laravel projects for beginners')">
 
 <meta name="robots" content="index, follow">
 <meta name="author" content="Subhadip Nayak">
