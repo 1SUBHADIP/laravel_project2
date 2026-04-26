@@ -1,9 +1,3 @@
-@extends('layout')
-
-@section('title', 'Library Management System Laravel Project with Source Code')
-@section('meta_description', 'Library Management System project using Laravel and PostgreSQL with admin dashboard and book management system.')
-@section('meta_keywords', 'library management system laravel project, php library system, college project laravel')
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
