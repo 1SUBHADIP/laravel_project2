@@ -14,18 +14,7 @@ use App\Models\Member;
 use Illuminate\Support\Facades\Schema;
 
 
-Route::get('/sitemap.xml', function () {
-    return response(
-        '<?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            <url>
-                <loc>https://librarymanagementsystem-a6r5.onrender.com/</loc>
-            </url>
-        </urlset>',
-        200,
-        ['Content-Type' => 'application/xml']
-    );
-});
+
 
 // Redirect root to admin login if not authenticated, otherwise to dashboard
 Route::get('/', function () {
