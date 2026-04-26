@@ -491,12 +491,7 @@
     </style>
 </head>
 <body>
-    <h1>Library Management System in Laravel</h1>
-
-<p>
-This Library Management System is a college project developed using Laravel and PostgreSQL. 
-It helps manage books, members, issue-return system and admin dashboard efficiently.
-</p>
+    
     <div class="grain"></div>
     <span class="orbit orbit-a"></span>
     <span class="orbit orbit-b"></span>
