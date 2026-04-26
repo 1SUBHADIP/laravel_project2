@@ -198,44 +198,51 @@ class SettingsController extends Controller
         }
     }
 
-    public function getSystemLogs()
-    {
-        try {
-            $logFile = storage_path('logs/laravel.log');
+ public function getSystemLogs()
+{
+    try {
+        $logFile = storage_path('logs/laravel.log');
 
-            if (!file_exists($logFile)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Log file not found'
-                ]);
-            }
-
-            $logs = [];
-            $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-            // Get last 50 lines
-            $recentLines = array_slice($lines, -50);
-
-            foreach ($recentLines as $line) {
-                if (preg_match('/\[(.*?)\] (\w+)\.(\w+): (.*)/', $line, $matches)) {
-                    $logs[] = [
-                        'timestamp' => $matches[1],
-                        'level' => $matches[2],
-                        'type' => $matches[3],
-                        'message' => $matches[4]
-                    ];
-                }
-            }
-
+        // If log file not found (Render case)
+        if (!file_exists($logFile)) {
             return response()->json([
                 'success' => true,
-                'logs' => array_reverse($logs) // Show newest first
+                'logs' => [
+                    [
+                        'timestamp' => now(),
+                        'level' => 'INFO',
+                        'type' => 'system',
+                        'message' => 'Log file not found. Logs are available in Render Dashboard → Logs.'
+                    ]
+                ]
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to read logs: ' . $e->getMessage()
-            ], 500);
         }
+
+        $logs = [];
+        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        // Get last 50 lines
+        $recentLines = array_slice($lines, -50);
+
+        foreach ($recentLines as $line) {
+            if (preg_match('/\[(.*?)\] (\w+)\.(\w+): (.*)/', $line, $matches)) {
+                $logs[] = [
+                    'timestamp' => $matches[1],
+                    'level' => $matches[2],
+                    'type' => $matches[3],
+                    'message' => $matches[4]
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'logs' => array_reverse($logs)
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to read logs: ' . $e->getMessage()
+        ], 500);
     }
 }
