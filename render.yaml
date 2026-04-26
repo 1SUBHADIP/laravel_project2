@@ -15,9 +15,17 @@ services:
       - key: APP_KEY
         sync: false
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d7mr160g4nts73aqaf60-a
+      - key: DB_PORT
+        value: 5432
       - key: DB_DATABASE
-        value: /var/data/database.sqlite
+        value: library_db_8b3y
+      - key: DB_USERNAME
+        value: library_db_8b3y_user
+      - key: DB_PASSWORD
+        value: dP1rCQz7SsQ3RJM4sGnKrfKwdh9VIarf
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
