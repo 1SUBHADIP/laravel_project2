@@ -4,8 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="1vt7G1ESZjsGEIHDy7jJbuyBrWh6NqoLuuzuMKsSDuQ" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - CCLMS Library Management System</title>
+    <title>@yield('title', 'Library Management System in Laravel')</title>
+
+<meta name="description" content="@yield('meta_description', 'Library Management System built using Laravel and PostgreSQL. Manage books, members and loans easily.')">
+
+<meta name="keywords" content="@yield('meta_keywords', 'library management system laravel, php project, college project')">
+
+<meta name="robots" content="index, follow">
+<meta name="author" content="Subhadip Nayak">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

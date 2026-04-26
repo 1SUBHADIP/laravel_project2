@@ -1,3 +1,9 @@
+@extends('layout')
+
+@section('title', 'Library Management System Laravel Project with Source Code')
+@section('meta_description', 'Library Management System project using Laravel and PostgreSQL with admin dashboard and book management system.')
+@section('meta_keywords', 'library management system laravel project, php library system, college project laravel')
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -490,6 +496,12 @@
     </style>
 </head>
 <body>
+    <h1>Library Management System in Laravel</h1>
+
+<p>
+This Library Management System is a college project developed using Laravel and PostgreSQL. 
+It helps manage books, members, issue-return system and admin dashboard efficiently.
+</p>
     <div class="grain"></div>
     <span class="orbit orbit-a"></span>
     <span class="orbit orbit-b"></span>

@@ -13,6 +13,11 @@ use App\Models\Loan;
 use App\Models\Member;
 use Illuminate\Support\Facades\Schema;
 
+
+Route::get('/sitemap.xml', function () {
+    return response()->view('sitemap');
+});
+
 // Redirect root to admin login if not authenticated, otherwise to dashboard
 Route::get('/', function () {
     if (session()->has('admin_id')) {

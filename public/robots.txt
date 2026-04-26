@@ -1,2 +1,4 @@
 User-agent: *
-Disallow:
+Allow: /
+
+Sitemap: https://librarymanagementsystem-a6r5.onrender.com/sitemap.xml
