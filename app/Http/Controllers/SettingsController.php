@@ -145,10 +145,18 @@ class SettingsController extends Controller
     {
         try {
             $filename = 'library_backup_' . now()->format('Y-m-d_H-i-s') . '.sql';
-            $database = config('database.connections.mysql.database');
+           $database = config('database.connections.' . config('database.default') . '.database');
 
             // This is a simplified backup - in production you'd use proper backup tools
-            $tables = DB::select('SHOW TABLES');
+           if (DB::getDriverName() === 'pgsql') {
+            $tables = DB::select("
+                SELECT tablename 
+                FROM pg_tables 
+                WHERE schemaname = 'public'
+            ");
+            } else {
+                $tables = DB::select('SHOW TABLES');
+            }
             $tableCount = count($tables);
 
             return response()->json([
