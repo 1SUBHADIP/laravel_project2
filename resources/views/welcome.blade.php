@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="google-site-verification" content="1vt7G1ESZjsGEIHDy7jJbuyBrWh6NqoLuuzuMKsSDuQ" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CCLMS Library | Smart Circulation Hub</title>
