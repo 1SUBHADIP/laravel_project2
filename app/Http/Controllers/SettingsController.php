@@ -94,33 +94,35 @@ class SettingsController extends Controller
     }
 
     public function updateSystemSettings(Request $request)
-    {
-        $request->validate([
-            'app_name' => 'required|string|max:255',
-            'loan_duration' => 'required|integer|min:1|max:365',
-            'max_books_per_member' => 'required|integer|min:1|max:50',
-            'late_fee_per_day' => 'required|numeric|min:0',
-            'email_notifications' => 'boolean',
-            'sms_notifications' => 'boolean',
-        ]);
+{
+    $request->validate([
+        'app_name' => 'required|string|max:255',
+        'loan_duration' => 'required|integer|min:1|max:365',
+        'max_books_per_member' => 'required|integer|min:1|max:50',
+        'late_fee_per_day' => 'required|numeric|min:0',
+        'email_notifications' => 'boolean',
+        'sms_notifications' => 'boolean',
+    ]);
 
-        // Store settings in a configuration file or database
-        $settings = [
-            'app_name' => $request->app_name,
-            'loan_duration' => $request->loan_duration,
-            'max_books_per_member' => $request->max_books_per_member,
-            'late_fee_per_day' => $request->late_fee_per_day,
-            'email_notifications' => $request->boolean('email_notifications'),
-            'sms_notifications' => $request->boolean('sms_notifications'),
-        ];
+    $settings = [
+        'app_name' => $request->app_name,
+        'loan_duration' => $request->loan_duration,
+        'max_books_per_member' => $request->max_books_per_member,
+        'late_fee_per_day' => $request->late_fee_per_day,
+        'email_notifications' => $request->boolean('email_notifications'),
+        'sms_notifications' => $request->boolean('sms_notifications'),
+    ];
 
-        // For demo purposes, store in session
-        session(['library_settings' => $settings]);
-
-        return redirect()->route('settings.index')
-            ->with('success', 'System settings updated successfully!');
+    foreach ($settings as $key => $value) {
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => $key],
+            ['value' => $value]
+        );
     }
 
+    return redirect()->route('settings.index')
+        ->with('success', 'System settings updated successfully!');
+}
     public function clearCache()
     {
         try {
@@ -198,51 +200,44 @@ class SettingsController extends Controller
         }
     }
 
- public function getSystemLogs()
-{
-    try {
-        $logFile = storage_path('logs/laravel.log');
+    public function getSystemLogs()
+    {
+        try {
+            $logFile = storage_path('logs/laravel.log');
 
-        // If log file not found (Render case)
-        if (!file_exists($logFile)) {
+            if (!file_exists($logFile)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Log file not found'
+                ]);
+            }
+
+            $logs = [];
+            $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            // Get last 50 lines
+            $recentLines = array_slice($lines, -50);
+
+            foreach ($recentLines as $line) {
+                if (preg_match('/\[(.*?)\] (\w+)\.(\w+): (.*)/', $line, $matches)) {
+                    $logs[] = [
+                        'timestamp' => $matches[1],
+                        'level' => $matches[2],
+                        'type' => $matches[3],
+                        'message' => $matches[4]
+                    ];
+                }
+            }
+
             return response()->json([
                 'success' => true,
-                'logs' => [
-                    [
-                        'timestamp' => now(),
-                        'level' => 'INFO',
-                        'type' => 'system',
-                        'message' => 'Log file not found. Logs are available in Render Dashboard → Logs.'
-                    ]
-                ]
+                'logs' => array_reverse($logs) // Show newest first
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read logs: ' . $e->getMessage()
+            ], 500);
         }
-
-        $logs = [];
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-        // Get last 50 lines
-        $recentLines = array_slice($lines, -50);
-
-        foreach ($recentLines as $line) {
-            if (preg_match('/\[(.*?)\] (\w+)\.(\w+): (.*)/', $line, $matches)) {
-                $logs[] = [
-                    'timestamp' => $matches[1],
-                    'level' => $matches[2],
-                    'type' => $matches[3],
-                    'message' => $matches[4]
-                ];
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'logs' => array_reverse($logs)
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to read logs: ' . $e->getMessage()
-        ], 500);
     }
 }
