@@ -27,9 +27,9 @@ class MemberController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'student_id' => ['nullable', 'string', 'max:100'],
+            'student_id' => ['nullable', 'unique:members,student_id', 'max:100'],
             'email' => ['required', 'email', 'max:255', 'unique:members,email'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'unique:members,phone', 'max:50'],
             'department_id' => ['nullable', 'string'],
             'department_name' => ['nullable', 'string', 'max:255'],
         ]);
