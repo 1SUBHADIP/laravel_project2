@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - CCLMS Library Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/cclms.css') }}">
 </head>
@@ -18,26 +19,25 @@
       <p class="text-slate-400 text-sm mt-2">Enter your admin email to receive a reset link.</p>
     </div>
 
-    @if (session('status'))
+    {{-- @if (session('status'))
       <div class="mb-4 p-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200 text-sm">
         {{ session('status') }}
-      </div>
-    @endif
-
-    {{-- @if (session('reset_link'))
-      <div class="mb-4 p-3 rounded-lg bg-blue-900/40 border border-blue-700 text-blue-200 text-sm space-y-2">
-        <div>Password reset link:</div>
-        <a href="{{ session('reset_link') }}" class="break-all underline text-blue-300 hover:text-blue-100">
-          {{ session('reset_link') }}
-        </a>
       </div>
     @endif --}}
     @if (session('status'))
-      <div class="mb-4 p-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200 text-sm">
-        {{ session('status') }}
-      </div>
-    @endif
+<div 
+    x-data="{ show: true }" 
+    x-init="setTimeout(() => show = false, 5000)"
+    x-show="show"
+    x-transition
+    class="mb-4 p-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200 text-sm"
+>
+    {{ session('status') }}
+</div>
+@endif
 
+ 
+  
     @if($errors->any())
       <div class="mb-4 p-3 rounded-lg bg-red-900/40 border border-red-700 text-red-200 text-sm">
         <ul class="list-disc ml-5 space-y-1">
@@ -48,7 +48,7 @@
       </div>
     @endif
 
-    <form action="{{ route('admin.password.email') }}" method="POST" class="space-y-4">
+    {{-- <form action="{{ route('admin.password.email') }}" method="POST" class="space-y-4">
       @csrf
       <div>
         <label for="email" class="block text-sm text-slate-300 mb-2">Email Address</label>
@@ -70,7 +70,43 @@
       >
         Send Password Reset Link
       </button>
-    </form>
+    </form> --}}
+    <form 
+    x-data="{ loading: false }"
+    @submit="loading = true"
+    action="{{ route('admin.password.email') }}" 
+    method="POST" 
+    class="space-y-4"
+>
+    @csrf
+
+    <div>
+        <label for="email" class="block text-sm text-slate-300 mb-2">Email Address</label>
+        <input
+            id="email"
+            type="email"
+            name="email"
+            value="{{ old('email') }}"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white"
+            placeholder="admin@cclms.com"
+        >
+    </div>
+
+    <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
+        :disabled="loading"
+    >
+        <!-- Loader -->
+        <svg x-show="loading" class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="4" fill="none"/>
+        </svg>
+
+        <!-- Text -->
+        <span x-text="loading ? 'Sending...' : 'Send Password Reset Link'"></span>
+    </button>
+</form>
 
     <div class="mt-6 text-center">
       <a href="{{ route('admin.login') }}" class="text-sm text-slate-300 hover:text-white transition-colors">
