@@ -109,9 +109,9 @@
         
         <h3>📞 Contact Information:</h3>
         <p>
-            <strong>Phone:</strong> (555) 123-4567<br>
+            <strong>Phone:</strong> +91 8167518159<br>
             <strong>Email:</strong> library@cclms.edu<br>
-            <strong>Hours:</strong> Monday-Friday 8:00 AM - 8:00 PM
+            <strong>Hours:</strong> Monday-Friday 10:00 AM - 5:00 PM
         </p>
         
         <p>If you have already returned this book, please disregard this notice. If you have any questions or concerns, please contact us immediately.</p>
