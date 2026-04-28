@@ -160,10 +160,11 @@ class AdminAuthController extends Controller
             ])->withInput($request->only('email'));
         }
 
-        return back()->with([
-            'status' => 'If the email server is available, a password reset link has been sent.',
-            'reset_link' => $resetLink,
-        ]);
+        // return back()->with([
+        //     'status' => 'If the email server is available, a password reset link has been sent.',
+        //     'reset_link' => $resetLink,
+        // ]);
+        return back()->with('status', 'Password reset link sent to your email.');
     }
 
     public function showResetPassword(string $token, Request $request): View|RedirectResponse

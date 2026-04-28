@@ -24,12 +24,17 @@
       </div>
     @endif
 
-    @if (session('reset_link'))
+    {{-- @if (session('reset_link'))
       <div class="mb-4 p-3 rounded-lg bg-blue-900/40 border border-blue-700 text-blue-200 text-sm space-y-2">
         <div>Password reset link:</div>
         <a href="{{ session('reset_link') }}" class="break-all underline text-blue-300 hover:text-blue-100">
           {{ session('reset_link') }}
         </a>
+      </div>
+    @endif --}}
+    @if (session('status'))
+      <div class="mb-4 p-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200 text-sm">
+        {{ session('status') }}
       </div>
     @endif
 
