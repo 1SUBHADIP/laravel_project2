@@ -205,10 +205,11 @@ class SettingsController extends Controller
         try {
             $logFile = storage_path('logs/laravel.log');
 
-            if (!file_exists($logFile)) {
+           if (!file_exists($logFile)) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Log file not found'
+                    'success' => true,
+                    'logs' => [],
+                    'message' => 'Logs not stored in file. Check Render dashboard logs.'
                 ]);
             }
 
