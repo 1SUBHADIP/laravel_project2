@@ -209,7 +209,7 @@ class SettingsController extends Controller
                 return response()->json([
                     'success' => true,
                     'logs' => [],
-                    'message' => 'Logs not stored in file. Check Render dashboard logs.'
+                    'message' => 'Logs not stored in file.'
                 ]);
             }
 
