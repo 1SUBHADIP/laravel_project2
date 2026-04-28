@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Library Management System in Laravel')</title>
-<meta name="title" content="@yield('meta_title', 'CCLMS - Library Management System in Laravel')">
 <meta name="description" content="@yield('meta_description', 'Library Management System built using Laravel and PostgreSQL. Manage books, members and loans easily.')">
 
 <meta name="keywords" content="@yield('meta_keywords', 'library management system laravel, php project, college project, CCLMS Library Management System, college project ideas, laravel projects for beginners')">
