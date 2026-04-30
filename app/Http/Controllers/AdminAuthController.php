@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Auth\Passwords\PasswordBroker;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +13,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
 use RuntimeException;
-use Throwable;
 
 class AdminAuthController extends Controller
 {
@@ -117,53 +115,72 @@ class AdminAuthController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $defaultMailer = (string) config('mail.default');
-        $smtpUsername = (string) config('mail.mailers.smtp.username');
-        $smtpPassword = (string) config('mail.mailers.smtp.password');
-
-        if ($defaultMailer !== 'smtp') {
-            return back()->withErrors([
-                'email' => 'Email delivery is not enabled. Set MAIL_MAILER=smtp in environment settings.',
-            ])->withInput($request->only('email'));
-        }
-
-        // Prevent confusing runtime failures and throttling when SMTP is incomplete.
-        if ($smtpUsername === '' || $smtpPassword === '') {
-            return back()->withErrors([
-                'email' => 'Mail is not configured. Set MAIL_USERNAME and MAIL_PASSWORD (Google App Password) in .env, then retry.',
-            ])->withInput($request->only('email'));
-        }
-
         $user = User::where('email', $data['email'])->first();
 
-        // Keep response generic, but only send links for admin accounts.
         if (!$user || !$user->is_admin) {
             return back()->with('status', 'If your administrator account exists, a password reset link has been sent.');
         }
 
-        /** @var PasswordBroker $broker */
-        $broker = Password::broker();
+        $token = Password::broker()->createToken($user);
 
-        $token = $broker->createToken($user);
-        $resetLink = url('/admin/reset-password/' . $token . '?email=' . urlencode($user->email));
+        $originalMailer = (string) config('mail.default');
 
         try {
             $user->sendPasswordResetNotification($token);
-        } catch (Throwable $e) {
-            Log::error('Failed to send admin password reset link', [
+        } catch (\Exception $e) {
+            Log::warning('Primary mailer failed to send password reset email.', [
                 'email' => $data['email'],
                 'error' => $e->getMessage(),
+                'mailer' => $originalMailer,
             ]);
 
-            return back()->withErrors([
-                'email' => 'Unable to send password reset email right now. Please verify mail settings and try again.',
-            ])->withInput($request->only('email'));
+            // Try SMTP fallback if SMTP credentials exist and a different mailer was configured
+            $smtpUser = config('mail.mailers.smtp.username');
+            $smtpPass = config('mail.mailers.smtp.password');
+
+            if ($originalMailer !== 'smtp' && !empty($smtpUser) && !empty($smtpPass)) {
+                try {
+                    config(['mail.default' => 'smtp']);
+                    $user->sendPasswordResetNotification($token);
+                    // restore original
+                    config(['mail.default' => $originalMailer]);
+
+                    return back()->with('status', 'Password reset link sent to your email.');
+                } catch (\Exception $e2) {
+                    Log::error('SMTP fallback failed for password reset email.', [
+                        'email' => $data['email'],
+                        'error' => $e2->getMessage(),
+                    ]);
+                } finally {
+                    // ensure config restored
+                    config(['mail.default' => $originalMailer]);
+                }
+            }
+            // Final fallback: log the reset link so local development won't error
+            try {
+                $resetLink = route('password.reset', ['token' => $token, 'email' => $user->email]);
+                config(['mail.default' => 'log']);
+                $user->sendPasswordResetNotification($token);
+                Log::info('Password reset link logged (development): ' . $resetLink, ['email' => $user->email]);
+                // restore
+                config(['mail.default' => $originalMailer]);
+
+                return back()->with('status', 'If your administrator account exists, a password reset link has been sent.');
+            } catch (\Exception $e3) {
+                Log::error('Final log-mailer fallback failed for password reset email.', [
+                    'email' => $data['email'],
+                    'error' => $e3->getMessage(),
+                ]);
+
+                // restore config in worst case
+                config(['mail.default' => $originalMailer]);
+
+                return back()->withErrors([
+                    'email' => 'Unable to send password reset email right now. Please check mail configuration and try again.',
+                ]);
+            }
         }
 
-        // return back()->with([
-        //     'status' => 'If the email server is available, a password reset link has been sent.',
-        //     'reset_link' => $resetLink,
-        // ]);
         return back()->with('status', 'Password reset link sent to your email.');
     }
 

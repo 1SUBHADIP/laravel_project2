@@ -24,7 +24,13 @@ class AdminResetPasswordNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $resetUrl = url('/admin/reset-password/' . $this->token . '?email=' . urlencode($notifiable->email));
+        $resetPath = route('password.reset', [
+            'token' => $this->token,
+            'email' => $notifiable->email,
+        ], false);
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        $resetUrl = $appUrl . $resetPath;
 
         return (new MailMessage)
             ->subject('CCLMS Admin Password Reset')

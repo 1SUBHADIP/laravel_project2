@@ -20,39 +20,76 @@ php artisan serve --host=127.0.0.1 --port=8000
 ```
 
 6. Open:
+
 - http://127.0.0.1:8000/books
 - http://127.0.0.1:8000/members
 - http://127.0.0.1:8000/loans
 
+### Mail configuration
+
+- For local development keep `MAIL_MAILER=log` in `.env` so password reset links are written to the application log instead of failing due to missing credentials.
+- For production set `MAIL_MAILER` to `resend` (or `smtp`) and configure provider credentials in your host environment (never commit secrets to git).
+
+Example `.env` snippets:
+
+```bash
+# Resend provider (production)
+MAIL_MAILER=resend
+RESEND_API_KEY=your_resend_api_key_here
+
+# or SMTP (production alternative)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your_smtp_user
+MAIL_PASSWORD=your_smtp_password
+MAIL_ENCRYPTION=tls
+```
+
+After updating environment variables run:
+
+```bash
+php artisan config:clear
+php artisan cache:clear
+php artisan config:cache
+```
+
+If you want me to run an end-to-end send test after you set production credentials, tell me and I will run it here.
+
 ### Features
+
 - Books: create, edit, delete, available/total copies tracking
 - Members: create, edit, delete
 - Loans: create loan, mark as returned (stock auto-increment/decrement)
 
 ### Notes
+
 - Default loan period is 14 days (configurable in `LoanController@store`).
 - Uses SQLite; to switch DB, update `.env` and run migrations.
 
-### Render Deployment (Persistent Data)
+### Render Deployment (PostgreSQL)
 
 Use the included `render.yaml` blueprint for deployment. It configures:
 
-- Persistent disk mount at `/var/data`
-- SQLite path `DB_DATABASE=/var/data/database.sqlite`
+- PostgreSQL connection for Render
 - Stable production settings for session/cache/queue
+- Production mail settings set through Render environment variables
 
 Important:
 
 - Set a fixed `APP_KEY` in Render environment variables (do not leave it empty).
 - If `APP_KEY` is missing in production, the container now fails startup intentionally to prevent broken remember-me cookies.
-- If Render persistent disk is missing, startup now fails intentionally to avoid silent data loss from ephemeral SQLite storage.
+- Make sure the PostgreSQL database connection values are set in Render, either through `DATABASE_URL`, `DB_URL`, or the individual host, port, database, username, and password fields.
+- Set `MAIL_MAILER=smtp` in Render and provide the SMTP host, port, username, password, encryption, and from address in Render.
 
 Quick setup:
 
 1. Use values from `.env.render.example` for Render environment variables.
 2. Set `APP_KEY` to a fixed value (example: run `php artisan key:generate --show` once locally and copy that value).
-3. Attach a persistent disk and mount it at `/var/data`.
+3. Set the PostgreSQL database connection values in Render.
 4. Redeploy.
+
+If you want the password-reset email to work on Render, make sure the app URL in Render matches the public site URL and the mail credentials are set in Render's environment variables, not in the repository.
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
