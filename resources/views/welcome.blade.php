@@ -10,8 +10,7 @@
     <meta property="og:title" content="CCLMS Library Management System | Smart Circulation Hub">
     <meta property="og:description" content="Manage books, members, loans, reminders, and reports with CCLMS, a focused library management portal for modern institutions.">
     <meta property="og:type" content="website">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>CCLMS Library Management System | Smart Circulation Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

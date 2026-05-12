@@ -9,8 +9,7 @@
     <meta property="og:title" content="{{ $pageTitle }} | CCLMS Library Management System">
     <meta property="og:description" content="{{ $pageDescription }}">
     <meta property="og:type" content="article">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>{{ $pageTitle }} | CCLMS Library Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

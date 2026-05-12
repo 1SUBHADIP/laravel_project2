@@ -12,8 +12,7 @@
     <meta property="og:description" content="@yield('meta_description', 'CCLMS is a modern library management system for book circulation, member tracking, overdue control, and reporting in one streamlined portal.')">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="CCLMS Library Management System">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <script>
       window.libraryRoutes = {
         notificationsIndex: @json(route('notifications.index')),
@@ -617,5 +616,3 @@
   @stack('scripts')
 </body>
 </html>
-
-
