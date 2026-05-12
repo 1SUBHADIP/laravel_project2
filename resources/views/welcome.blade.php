@@ -4,8 +4,15 @@
     <meta name="google-site-verification" content="1vt7G1ESZjsGEIHDy7jJbuyBrWh6NqoLuuzuMKsSDuQ" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CCLMS Library | Smart Circulation Hub</title>
-    <meta name="description" content="CCLMS Library Management System keeps collections organized, members active, and lending workflows fast.">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="description" content="CCLMS Library Management System helps colleges manage catalogues, members, loans, reminders, and analytics from one clean dashboard.">
+    <meta name="keywords" content="CCLMS library, college library management system, Laravel library project, library circulation software, overdue reminder system, student book issue system, library analytics dashboard">
+    <meta property="og:title" content="CCLMS Library Management System | Smart Circulation Hub">
+    <meta property="og:description" content="Manage books, members, loans, reminders, and reports with CCLMS, a focused library management portal for modern institutions.">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <title>CCLMS Library Management System | Smart Circulation Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -112,6 +119,48 @@
         .login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 18px 34px rgba(242, 95, 76, 0.35);
+        }
+
+        .navbar {
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(255, 250, 239, 0.92));
+            border-bottom: 1px solid var(--line);
+            padding: 0;
+            margin: 0 -92vw 24px;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+        }
+
+        .navbar-content {
+            width: min(1160px, 92vw);
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 0;
+        }
+
+        .navbar-link {
+            display: inline-block;
+            padding: 8px 18px;
+            text-decoration: none;
+            color: var(--ink);
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .navbar-link:first-child {
+            color: var(--clay);
+        }
+
+        .navbar-link:hover {
+            background: rgba(0, 123, 131, 0.1);
+            color: var(--teal);
         }
 
         .hero-grid {
@@ -505,20 +554,30 @@
             <a href="{{ route('admin.login') }}" class="login-btn">Admin Login</a>
         </header>
 
+        <nav class="navbar">
+            <div class="navbar-content">
+                <a href="{{ url('/') }}" class="navbar-link">Home</a>
+                <a href="{{ route('public.about') }}" class="navbar-link">About Us</a>
+                <a href="{{ route('public.rules') }}" class="navbar-link">Library Rules</a>
+                <a href="{{ route('public.contact') }}" class="navbar-link">Contact</a>
+                <a href="{{ route('public.privacy') }}" class="navbar-link">Privacy</a>
+            </div>
+        </nav>
+
         <section class="hero-grid" aria-label="Landing hero">
             <article class="hero">
-                <span class="tag">Campus Circulation Command</span>
+                <span class="tag">Next-Gen Library Intelligence</span>
                 <h1>
-                    Your <span class="highlight">library flow</span>,
-                    measured and managed in one place.
+                    Transform your <span class="highlight">library operations</span>
+                    with smart circulation management.
                 </h1>
                 <p class="subtitle">
-                    CCLMS blends catalog control, member activity, and borrowing intelligence into a single workspace.
-                    Track every book movement, reduce overdue risk, and keep your team focused on service instead of spreadsheets.
+                    CCLMS empowers modern institutions with real-time catalog control, intelligent member tracking, and predictive overdue management. 
+                    Eliminate manual workflows, reduce book loss, and create seamless borrowing experiences for your community.
                 </p>
                 <div class="hero-actions">
-                    <a href="{{ route('admin.login') }}" class="btn-primary">Open Admin Console</a>
-                    <a href="{{ route('admin.password.request') }}" class="btn-secondary">Forgot Password</a>
+                    <a href="{{ route('admin.login') }}" class="btn-primary">Launch Dashboard</a>
+                    <a href="{{ route('public.about') }}" class="btn-secondary">Learn More</a>
                 </div>
             </article>
 
@@ -576,16 +635,16 @@
 
         <section class="panel" aria-label="Core capabilities">
             <article class="panel-card">
-                <h3>Catalog Clarity</h3>
-                <p>Keep metadata, categories, and availability synchronized across your collection lifecycle.</p>
+                <h3>📚 Smart Catalog</h3>
+                <p>Organize, track, and optimize your collection with intelligent categorization and real-time availability updates.</p>
             </article>
             <article class="panel-card">
-                <h3>Member Rhythm</h3>
-                <p>Support responsible borrowing with transparent due tracking and instant profile lookup.</p>
+                <h3>👥 Member Intelligence</h3>
+                <p>Build deeper engagement with member profiles, borrowing history, and personalized circulation insights.</p>
             </article>
             <article class="panel-card">
-                <h3>Actionable Reports</h3>
-                <p>Read overdue trends and circulation pressure points before they become bottlenecks.</p>
+                <h3>📊 Predictive Analytics</h3>
+                <p>Anticipate overdue patterns, optimize collection performance, and make data-driven library decisions.</p>
             </article>
         </section>
 

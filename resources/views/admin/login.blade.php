@@ -4,27 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - CCLMS Library Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/cclms.css') }}">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                DEFAULT: '#1f6feb',
-                600: '#1a5bcc',
-                700: '#144a9e'
-              },
-              bg: '#0d1117',
-              card: '#161b22',
-              accent: '#39d353'
-            }
-          }
-        }
-      }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gradient-to-br from-bg via-slate-900 to-bg flex items-center justify-center p-4">
   <!-- Background Pattern -->
@@ -92,7 +72,7 @@
                    name="email" 
                    value="{{ old('email') }}" 
                    class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200"
-                   placeholder="admin@cclms.com"
+                   placeholder="Enter admin email"
                    required
                    autocomplete="email">
           </div>

@@ -5,36 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Library Management System in Laravel')</title>
-<meta name="description" content="@yield('meta_description', 'Library Management System built using Laravel and PostgreSQL. Manage books, members and loans easily.')">
-
-<meta name="keywords" content="@yield('meta_keywords', 'library management system laravel, php project, college project, CCLMS Library Management System, college project ideas, laravel projects for beginners')">
-
-<meta name="robots" content="index, follow">
-<meta name="author" content="Subhadip Nayak">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/cclms.css') }}">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="description" content="@yield('meta_description', 'CCLMS is a modern library management system for book circulation, member tracking, overdue control, and reporting in one streamlined portal.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'CCLMS, library management system, college library software, book circulation portal, library analytics, overdue tracking, student library portal, Laravel library system')">
+    <meta property="og:title" content="@yield('title', 'CCLMS Library Management System | Smart Library Portal')">
+    <meta property="og:description" content="@yield('meta_description', 'CCLMS is a modern library management system for book circulation, member tracking, overdue control, and reporting in one streamlined portal.')">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CCLMS Library Management System">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                DEFAULT: '#1f6feb',
-                600: '#1a5bcc',
-                700: '#144a9e'
-              },
-              bg: '#0d1117',
-              card: '#161b22',
-              accent: '#39d353',
-              sidebar: '#0a0e16'
-            }
-          }
-        }
-      }
+      window.libraryRoutes = {
+        notificationsIndex: @json(route('notifications.index')),
+        notificationsMarkRead: @json(route('notifications.mark-read')),
+        notificationsMarkAllRead: @json(route('notifications.mark-all-read')),
+        notificationsClearAll: @json(route('notifications.clear-all'))
+      };
     </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title>@yield('title', 'CCLMS Library Management System | Smart Library Portal')</title>
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Subhadip Nayak">
 </head>
 <body class="min-h-screen bg-bg text-slate-200">
   <!-- Top Navigation -->
@@ -480,14 +471,19 @@
   <!-- Footer -->
   <footer class="border-t border-slate-800 bg-card/30">
     <div class="px-6 py-4">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-4">
           <span class="text-sm text-slate-400">© {{ date('Y') }} CCLMS Library Management System</span>
           <span class="hidden sm:block text-xs text-slate-500">v1.0.0</span>
         </div>
-        <div class="flex items-center gap-4 text-xs text-slate-500">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+          <a href="{{ route('public.about') }}" class="hover:text-slate-300 transition-colors">About</a>
+          <a href="{{ route('public.rules') }}" class="hover:text-slate-300 transition-colors">Library Rules</a>
+          <a href="{{ route('public.contact') }}" class="hover:text-slate-300 transition-colors">Contact</a>
+          <a href="{{ route('public.privacy') }}" class="hover:text-slate-300 transition-colors">Privacy</a>
+          <span class="hidden sm:inline">•</span>
           <span>Built with Laravel {{ app()->version() }}</span>
-          <span>•</span>
+          <span class="hidden sm:inline">•</span>
           <span>Powered by Tailwind CSS</span>
         </div>
       </div>
@@ -601,149 +597,6 @@
         alert.style.transform = 'translateY(-10px)';
         setTimeout(() => alert.remove(), 300);
       }, 5000);
-    });
-
-    // Notifications Alpine.js component
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('notifications', () => ({
-        open: false,
-        notifications: [],
-        unreadCount: 0,
-        
-        init() {
-          this.loadNotifications();
-          // Refresh notifications every 30 seconds
-          setInterval(() => this.loadNotifications(), 30000);
-        },
-      
-        async loadNotifications() {
-          try {
-            console.log('Loading notifications...');
-            const response = await fetch('{{ route("notifications.index") }}');
-            const data = await response.json();
-            console.log('Notifications data:', data);
-            this.notifications = data.notifications;
-            this.unreadCount = data.unread_count;
-          } catch (error) {
-            console.error('Failed to load notifications:', error);
-          }
-        },
-
-        toggleDropdown() {
-          this.open = !this.open;
-        },
-      
-        async markAsRead(notificationId) {
-          try {
-            await fetch('{{ route("notifications.mark-read") }}', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-              },
-              body: JSON.stringify({ id: notificationId })
-            });
-            
-            // Update local state
-            const notification = this.notifications.find(n => n.id === notificationId);
-            if (notification && !notification.read) {
-              notification.read = true;
-              this.unreadCount = Math.max(0, this.unreadCount - 1);
-            }
-          } catch (error) {
-            console.error('Failed to mark notification as read:', error);
-          }
-        },
-
-        async handleNotificationClick(notification) {
-          if (!notification.read) {
-            await this.markAsRead(notification.id);
-          }
-
-          if (notification.action_url) {
-            window.location.href = notification.action_url;
-          }
-        },
-      
-        async markAllAsRead() {
-          try {
-            await fetch('{{ route("notifications.mark-all-read") }}', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-              }
-            });
-            
-            // Update local state
-            this.notifications.forEach(notification => {
-              notification.read = true;
-            });
-            this.unreadCount = 0;
-          } catch (error) {
-            console.error('Failed to mark all notifications as read:', error);
-          }
-        },
-      
-        async clearAllNotifications() {
-          // Show confirmation dialog
-          if (!confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
-            return;
-          }
-          
-          try {
-            await fetch('{{ route("notifications.clear-all") }}', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-              }
-            });
-            
-            // Update local state
-            this.notifications = [];
-            this.unreadCount = 0;
-            this.open = false; // Close dropdown
-            
-            // Show success message
-            this.showToast('All notifications cleared successfully', 'success');
-          } catch (error) {
-            console.error('Failed to clear all notifications:', error);
-            this.showToast('Failed to clear notifications', 'error');
-          }
-        },
-      
-        showToast(message, type = 'info') {
-          // Create toast notification
-          const toast = document.createElement('div');
-          toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-          
-          const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
-          toast.className += ` ${bgColor} text-white`;
-          
-          const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
-          
-          toast.innerHTML = `
-            <div class="flex items-center gap-2">
-              <i class="${icon}"></i>
-              <span>${message}</span>
-            </div>
-          `;
-          
-          document.body.appendChild(toast);
-          
-          // Animate in
-          setTimeout(() => {
-            toast.classList.remove('translate-x-full');
-          }, 100);
-          
-          // Remove after 3 seconds
-          setTimeout(() => {
-            toast.classList.add('translate-x-full');
-            setTimeout(() => toast.remove(), 300);
-          }, 3000);
-        }
-      }))
     });
 
     // Smooth scrolling for anchor links
