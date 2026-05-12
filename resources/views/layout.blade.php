@@ -23,7 +23,7 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <title>@yield('title', 'CCLMS Library Management System | Smart Library Portal')</title>
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="author" content="Subhadip Nayak">
 </head>
 <body class="min-h-screen bg-bg text-slate-200">

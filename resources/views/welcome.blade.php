@@ -10,6 +10,13 @@
     <meta property="og:title" content="CCLMS Library Management System | Smart Circulation Hub">
     <meta property="og:description" content="Manage books, members, loans, reminders, and reports with CCLMS, a focused library management portal for modern institutions.">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('logo.png') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="CCLMS Library Management System | Smart Circulation Hub">
+    <meta name="twitter:description" content="Manage books, members, loans, reminders, and reports with CCLMS, a focused library management portal for modern institutions.">
+    <meta name="twitter:image" content="{{ asset('logo.png') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>CCLMS Library Management System | Smart Circulation Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -489,6 +496,14 @@
             }
         }
 
+    @media (max-width: 850px) {
+        .navbar-content {
+            flex-wrap: wrap;
+            gap: 14px;
+            padding: 14px 0;
+        }
+    }
+
         @media (max-width: 1040px) {
             .hero-grid {
                 grid-template-columns: 1fr;
@@ -515,6 +530,11 @@
 
             .topbar {
                 margin-bottom: 20px;
+            }
+
+            .navbar-link {
+                padding: 6px 10px;
+                font-size: 0.85rem;
             }
 
             .hero,

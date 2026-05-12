@@ -9,6 +9,13 @@
     <meta property="og:title" content="{{ $pageTitle }} | CCLMS Library Management System">
     <meta property="og:description" content="{{ $pageDescription }}">
     <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('logo.png') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $pageTitle }} | CCLMS Library Management System">
+    <meta name="twitter:description" content="{{ $pageDescription }}">
+    <meta name="twitter:image" content="{{ asset('logo.png') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <title>{{ $pageTitle }} | CCLMS Library Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
