@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0d1117">
     <meta name="description" content="CCLMS Library Management System helps colleges manage catalogues, members, loans, reminders, and analytics from one clean dashboard.">
-    <meta name="keywords" content="CCLMS library, college library management system, Laravel library project, library circulation software, overdue reminder system, student book issue system, library analytics dashboard">
+    <meta name="keywords" content="CCLMS library, college library management system, Laravel library project, library circulation software, overdue reminder system, student book issue system, library analytics dashboard, library management system, online library management system, library management software, college library management system, book issue return system, library automation system, digital library management system, Laravel library management system">
     <meta property="og:title" content="CCLMS Library Management System | Smart Circulation Hub">
     <meta property="og:description" content="Manage books, members, loans, reminders, and reports with CCLMS, a focused library management portal for modern institutions.">
     <meta property="og:type" content="website">
