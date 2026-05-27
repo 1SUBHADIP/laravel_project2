@@ -225,7 +225,7 @@
                   <i class="fas fa-home text-slate-400"></i>
                   Dashboard
                 </a>
-                <a href="{{ route('settings.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 transition-colors">
+                <a href="{{ session('student_id') ? route('student.settings.index') : route('settings.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 transition-colors">
                   <i class="fas fa-cog text-slate-400"></i>
                   Settings
                 </a>
@@ -313,7 +313,7 @@
             <li>
               <a href="{{ route('loans.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('loans.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-exchange-alt w-5"></i>
-                <span>Loans</span>
+                <span>Issued Books</span>
               </a>
             </li>
             <li>
@@ -359,7 +359,7 @@
           <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Account</h3>
           <ul class="space-y-1">
             <li>
-              <a href="{{ route('settings.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('settings.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
+              <a href="{{ session('student_id') ? route('student.settings.index') : route('settings.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg border-l-2 transition-colors {{ request()->routeIs('settings.*') || request()->routeIs('student.settings.*') ? 'border-primary bg-primary/20 text-primary' : 'border-transparent text-slate-300 hover:bg-slate-700 hover:border-slate-600' }}">
                 <i class="fas fa-cog w-5"></i>
                 <span>Settings</span>
               </a>

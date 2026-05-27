@@ -78,6 +78,23 @@
           @enderror
         </div>
 
+        <div>
+          <label for="department_id" class="block text-sm font-medium text-slate-300 mb-2">
+            <i class="fas fa-building mr-2"></i>Department
+          </label>
+          <select id="department_id"
+                  name="department_id"
+                  class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200">
+            <option value="">All Departments</option>
+            @foreach($departments as $department)
+              <option value="{{ $department->id }}" @selected(old('department_id') == $department->id)>{{ $department->name }}</option>
+            @endforeach
+          </select>
+          @error('department_id')
+            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+          @enderror
+        </div>
+
         <!-- ISBN -->
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-slate-300 mb-2">
@@ -104,6 +121,25 @@
           @error('total_copies')
             <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
           @enderror
+        </div>
+
+        <div class="md:col-span-2 rounded-lg border border-slate-700 bg-slate-900/50 p-4">
+          <label class="flex items-center gap-3 text-sm font-medium text-slate-300">
+            <input type="checkbox" name="has_kindle_version" value="1" @checked(old('has_kindle_version')) class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary/20">
+            <span><i class="fas fa-tablet-alt mr-2"></i>Available on Kindle</span>
+          </label>
+          <div class="mt-4">
+            <label for="kindle_link" class="block text-sm font-medium text-slate-400 mb-2">Kindle Link</label>
+            <input type="url"
+                   id="kindle_link"
+                   name="kindle_link"
+                   value="{{ old('kindle_link') }}"
+                   class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200"
+                   placeholder="https://amazon.com/...">
+            @error('kindle_link')
+              <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+            @enderror
+          </div>
         </div>
       </div>
 

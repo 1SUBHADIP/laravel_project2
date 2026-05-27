@@ -7,12 +7,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
+use App\Models\SystemSetting;
 use RuntimeException;
 
 class SettingsController extends Controller
 {
     public function index()
     {
+        $librarySettings = $this->getLibrarySettings();
+        session(['library_settings' => $librarySettings]);
+
         $systemInfo = [
             'app_version' => config('app.version', '1.0.0'),
             'laravel_version' => app()->version(),
@@ -30,7 +34,7 @@ class SettingsController extends Controller
         $adminId = session('admin_id');
         $currentUser = User::find($adminId);
 
-        return view('settings.index', compact('systemInfo', 'currentUser'));
+        return view('settings.index', compact('systemInfo', 'currentUser', 'librarySettings'));
     }
 
     public function updateProfile(Request $request)
@@ -94,35 +98,51 @@ class SettingsController extends Controller
     }
 
     public function updateSystemSettings(Request $request)
-{
-    $request->validate([
-        'app_name' => 'required|string|max:255',
-        'loan_duration' => 'required|integer|min:1|max:365',
-        'max_books_per_member' => 'required|integer|min:1|max:50',
-        'late_fee_per_day' => 'required|numeric|min:0',
-        'email_notifications' => 'boolean',
-        'sms_notifications' => 'boolean',
-    ]);
+    {
+        $request->validate([
+            'app_name' => 'required|string|max:255',
+            'loan_duration' => 'required|integer|min:1|max:365',
+            'max_books_per_member' => 'required|integer|min:1|max:50',
+            'late_fee_per_day' => 'required|numeric|min:0',
+            'email_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+        ]);
 
-    $settings = [
-        'app_name' => $request->app_name,
-        'loan_duration' => $request->loan_duration,
-        'max_books_per_member' => $request->max_books_per_member,
-        'late_fee_per_day' => $request->late_fee_per_day,
-        'email_notifications' => $request->boolean('email_notifications'),
-        'sms_notifications' => $request->boolean('sms_notifications'),
-    ];
+        $settings = [
+            'app_name' => $request->app_name,
+            'loan_duration' => $request->loan_duration,
+            'max_books_per_member' => $request->max_books_per_member,
+            'late_fee_per_day' => $request->late_fee_per_day,
+            'email_notifications' => $request->boolean('email_notifications'),
+            'sms_notifications' => $request->boolean('sms_notifications'),
+        ];
 
-    foreach ($settings as $key => $value) {
-        \App\Models\SystemSetting::updateOrCreate(
-            ['key' => $key],
-            ['value' => $value]
-        );
+        foreach ($settings as $key => $value) {
+            SystemSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
+        }
+
+        session(['library_settings' => $this->getLibrarySettings()]);
+
+        return redirect()->route('settings.index')
+            ->with('success', 'System settings updated successfully!');
     }
 
-    return redirect()->route('settings.index')
-        ->with('success', 'System settings updated successfully!');
-}
+    private function getLibrarySettings(): array
+    {
+        $storedSettings = SystemSetting::query()->pluck('value', 'key')->toArray();
+
+        return [
+            'app_name' => $storedSettings['app_name'] ?? 'CCLMS Library Management System',
+            'loan_duration' => (int) ($storedSettings['loan_duration'] ?? 14),
+            'max_books_per_member' => (int) ($storedSettings['max_books_per_member'] ?? 5),
+            'late_fee_per_day' => (float) ($storedSettings['late_fee_per_day'] ?? 0.50),
+            'email_notifications' => filter_var($storedSettings['email_notifications'] ?? true, FILTER_VALIDATE_BOOL),
+            'sms_notifications' => filter_var($storedSettings['sms_notifications'] ?? false, FILTER_VALIDATE_BOOL),
+        ];
+    }
     public function clearCache()
     {
         try {
@@ -147,11 +167,11 @@ class SettingsController extends Controller
     {
         try {
             $filename = 'library_backup_' . now()->format('Y-m-d_H-i-s') . '.sql';
-           $database = config('database.connections.' . config('database.default') . '.database');
+            $database = config('database.connections.' . config('database.default') . '.database');
 
             // This is a simplified backup - in production you'd use proper backup tools
-           if (DB::getDriverName() === 'pgsql') {
-            $tables = DB::select("
+            if (DB::getDriverName() === 'pgsql') {
+                $tables = DB::select("
                 SELECT tablename 
                 FROM pg_tables 
                 WHERE schemaname = 'public'
@@ -205,7 +225,7 @@ class SettingsController extends Controller
         try {
             $logFile = storage_path('logs/laravel.log');
 
-           if (!file_exists($logFile)) {
+            if (!file_exists($logFile)) {
                 return response()->json([
                     'success' => true,
                     'logs' => [],

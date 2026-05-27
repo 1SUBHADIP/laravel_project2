@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StudentAuthController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -15,8 +17,8 @@ use Illuminate\Support\Facades\Schema;
 
 
 // Redirect root to admin login if not authenticated, otherwise to dashboard
-Route::get('/', function () {
-    if (session()->has('admin_id')) {
+Route::get('/', function (Request $request) {
+    if ($request->session()->has('admin_id')) {
         return redirect()->route('dashboard');
     }
 
@@ -42,7 +44,7 @@ Route::get('/', function () {
             ->count('id');
     }
 
-    return view()->file(resource_path('views/welcome.blade.php'), $stats);
+    return view('welcome', $stats);
 });
 
 Route::view('/about', 'pages.info', [
@@ -109,8 +111,32 @@ Route::group([], function () {
         ->name('admin.password.update');
 });
 
+Route::group([], function () {
+    Route::get('/student/login', [StudentAuthController::class, 'showLogin'])->name('student.login');
+    Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.submit');
+    Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
+    // Student password reset (OTP) flow
+    Route::get('/student/forgot-password', [StudentAuthController::class, 'showForgotPassword'])->name('student.password.request');
+    Route::post('/student/forgot-password', [StudentAuthController::class, 'sendResetOtp'])->name('student.password.sendotp');
+    Route::get('/student/password/verify', [StudentAuthController::class, 'showVerifyOtp'])->name('student.password.verify');
+    Route::post('/student/password/verify', [StudentAuthController::class, 'verifyOtp'])->name('student.password.checkotp');
+    Route::get('/student/password/reset', [StudentAuthController::class, 'showResetForm'])->name('student.password.reset');
+    Route::post('/student/password/reset', [StudentAuthController::class, 'resetPassword'])->name('student.password.update');
+});
+
 // Admin logout (accessible when logged in)
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('admin');
+
+Route::middleware(['student'])->group(function () {
+    Route::get('/student/dashboard', [StudentAuthController::class, 'dashboard'])->name('student.dashboard');
+    Route::post('/student/loans/{loan}/renew', [StudentAuthController::class, 'requestRenewal'])->name('student.loans.renew');
+    // Change password when logged in
+    Route::get('/student/password/change', [StudentAuthController::class, 'showChangePassword'])->name('student.password.change');
+    Route::post('/student/password/change', [StudentAuthController::class, 'changePassword'])->name('student.password.change.submit');
+    // Student settings
+    Route::post('/student/settings/profile', [\App\Http\Controllers\StudentSettingsController::class, 'updateProfile'])->name('student.settings.profile');
+    Route::get('/student/settings', [\App\Http\Controllers\StudentSettingsController::class, 'show'])->name('student.settings.index');
+});
 
 // Protected application routes with admin middleware
 Route::middleware(['admin'])->group(function () {

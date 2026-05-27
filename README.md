@@ -56,6 +56,14 @@ php artisan config:cache
 
 If you want me to run an end-to-end send test after you set production credentials, tell me and I will run it here.
 
+### SMS configuration
+
+- Student password-reset OTPs are sent through Twilio in `app/Services/SmsService.php`.
+- Set `TWILIO_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER` in `.env`.
+- Set `SMS_DEFAULT_COUNTRY_CODE` if your stored phone numbers do not already include a leading country code.
+- Phone numbers should be stored in a deliverable format such as `+15550101` or `+91xxxxxxxxxx`.
+- After changing SMS environment variables run `php artisan config:clear` and `php artisan config:cache`.
+
 ### Features
 
 - Books: create, edit, delete, available/total copies tracking
