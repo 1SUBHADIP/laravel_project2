@@ -570,7 +570,10 @@
                 <span class="brand-badge">CL</span>
                 <span class="brand-name">CCLMS Library</span>
             </a>
-            <a href="{{ route('admin.login') }}" class="login-btn">Admin Login</a>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+                <a href="{{ route('student.login') }}" class="btn-secondary">Student Login</a>
+                <a href="{{ route('admin.login') }}" class="login-btn">Admin Login</a>
+            </div>
         </header>
 
         <nav class="navbar">
@@ -595,6 +598,7 @@
                     Eliminate manual workflows, reduce book loss, and create seamless borrowing experiences for your community.
                 </p>
                 <div class="hero-actions">
+                    <a href="{{ route('student.login') }}" class="btn-secondary">Student Login</a>
                     <a href="{{ route('admin.login') }}" class="btn-primary">Launch Dashboard</a>
                     <a href="{{ route('public.about') }}" class="btn-secondary">Learn More</a>
                 </div>
@@ -643,11 +647,11 @@
                 <p class="stat-value">{{ number_format($totalMembers) }}</p>
             </article>
             <article class="stat">
-                <p class="stat-label">Active Loans</p>
+                <p class="stat-label">Active Issued Books</p>
                 <p class="stat-value">{{ number_format($activeLoans) }}</p>
             </article>
             <article class="stat">
-                <p class="stat-label">Overdue Loans</p>
+                <p class="stat-label">Overdue Issued Books</p>
                 <p class="stat-value">{{ number_format($overdueLoans) }}</p>
             </article>
         </section>

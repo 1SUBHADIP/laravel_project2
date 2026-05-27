@@ -105,7 +105,7 @@
     </div>
   </div>
 
-  <!-- Active Loans -->
+  <!-- Active Issued Books -->
   <div class="bg-card border border-slate-800 rounded-xl p-6">
     <div class="flex items-center justify-between mb-4">
       <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
@@ -113,7 +113,7 @@
       </div>
       <span class="text-2xl font-bold text-white">{{ $activeLoans }}</span>
     </div>
-    <h3 class="text-lg font-semibold text-white mb-2">Active Loans</h3>
+    <h3 class="text-lg font-semibold text-white mb-2">Active Issued Books</h3>
     <div class="flex items-center text-sm">
       <span class="text-blue-400">
         <i class="fas fa-clock mr-1"></i>

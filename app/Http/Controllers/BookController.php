@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Department;
 use App\Helpers\AdminActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class BookController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Book::with('category')->orderBy('title');
+        $query = Book::with(['category', 'department'])->orderBy('title');
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -25,14 +26,15 @@ class BookController extends Controller
             $query->where('category_id', $categoryId);
         }
         $books = $query->paginate(10)->withQueryString();
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::query()->orderBy('name', 'asc')->get();
         return view('books.index', compact('books', 'categories'));
     }
 
     public function create(): View
     {
-        $categories = Category::orderBy('name')->get();
-        return view('books.create', compact('categories'));
+        $categories = Category::query()->orderBy('name', 'asc')->get();
+        $departments = Department::query()->orderBy('name', 'asc')->get();
+        return view('books.create', compact('categories', 'departments'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -43,9 +45,13 @@ class BookController extends Controller
             'isbn' => ['required', 'string', 'max:64', 'unique:books,isbn'],
             'total_copies' => ['required', 'integer', 'min:1'],
             'category_id' => ['nullable', 'exists:categories,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'has_kindle_version' => ['nullable', 'boolean'],
+            'kindle_link' => ['nullable', 'url', 'max:2048'],
         ]);
 
         $data['available_copies'] = $data['total_copies'];
+        $data['has_kindle_version'] = $request->boolean('has_kindle_version');
         $book = Book::create($data);
 
         // Log admin activity
@@ -61,8 +67,9 @@ class BookController extends Controller
 
     public function edit(Book $book): View
     {
-        $categories = Category::orderBy('name')->get();
-        return view('books.edit', compact('book', 'categories'));
+        $categories = Category::query()->orderBy('name', 'asc')->get();
+        $departments = Department::query()->orderBy('name', 'asc')->get();
+        return view('books.edit', compact('book', 'categories', 'departments'));
     }
 
     public function update(Request $request, Book $book): RedirectResponse
@@ -73,10 +80,14 @@ class BookController extends Controller
             'isbn' => ['required', 'string', 'max:64', 'unique:books,isbn,' . $book->id],
             'total_copies' => ['required', 'integer', 'min:1'],
             'category_id' => ['nullable', 'exists:categories,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'has_kindle_version' => ['nullable', 'boolean'],
+            'kindle_link' => ['nullable', 'url', 'max:2048'],
         ]);
 
         // Adjust available copies proportionally if total changes downwards
         $difference = $data['total_copies'] - $book->total_copies;
+        $data['has_kindle_version'] = $request->boolean('has_kindle_version');
         $book->fill($data);
         $book->available_copies = max(0, $book->available_copies + $difference);
         $book->save();
@@ -97,7 +108,7 @@ class BookController extends Controller
         $title = $book->title;
         $author = $book->author;
 
-        $book->delete();
+        Book::destroy($book->id);
 
         // Log admin activity
         AdminActivityLogger::log(

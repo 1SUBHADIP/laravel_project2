@@ -104,6 +104,25 @@
       @endif
     </div>
   </div>
+
+  <!-- Kindle Books -->
+  <div class="bg-card border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-all duration-200">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-slate-400 text-sm font-medium">Kindle Books</p>
+        <p class="text-3xl font-bold text-white mt-1">{{ number_format($counts['kindle_books']) }}</p>
+      </div>
+      <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+        <i class="fas fa-tablet-alt text-cyan-400 text-xl"></i>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center text-sm">
+      <span class="text-cyan-400">
+        <i class="fas fa-book-open mr-1"></i>
+        Digital access ready
+      </span>
+    </div>
+  </div>
 </div>
 
 <!-- Quick Actions -->

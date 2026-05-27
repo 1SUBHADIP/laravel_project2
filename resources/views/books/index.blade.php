@@ -31,6 +31,8 @@
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Author</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">ISBN</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Category</th>
+        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Department</th>
+        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Kindle</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Available/Total</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Actions</th>
       </tr>
@@ -42,6 +44,14 @@
           <td class="px-4 py-3">{{ $book->author }}</td>
           <td class="px-4 py-3">{{ $book->isbn }}</td>
           <td class="px-4 py-3">{{ $book->category?->name ?? '-' }}</td>
+          <td class="px-4 py-3">{{ $book->department?->name ?? '-' }}</td>
+          <td class="px-4 py-3">
+            @if($book->has_kindle_version)
+              <span class="inline-flex items-center rounded-full bg-cyan-500/15 px-2.5 py-0.5 text-xs font-medium text-cyan-300">Yes</span>
+            @else
+              <span class="text-slate-500">No</span>
+            @endif
+          </td>
           <td class="px-4 py-3">{{ $book->available_copies }} / {{ $book->total_copies }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-2">

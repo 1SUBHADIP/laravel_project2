@@ -1,7 +1,7 @@
 @extends('layout')
 
-@section('title', 'New Loan')
-@section('breadcrumb', 'Loans / New')
+@section('title', 'Issue Book')
+@section('breadcrumb', 'Issued Books / Issue')
 
 @section('content')
 <form action="{{ route('loans.store') }}" method="POST" class="mt-3 space-y-4 max-w-4xl">
@@ -34,7 +34,7 @@
   </div>
   <div class="flex gap-2">
     <a href="{{ route('loans.index') }}" class="inline-flex items-center rounded-md border border-slate-600 px-3 py-2 text-sm hover:bg-slate-800">Cancel</a>
-    <button class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">Create</button>
+    <button class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">Issue Book</button>
   </div>
 </form>
 @endsection
