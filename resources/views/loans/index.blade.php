@@ -1,11 +1,11 @@
 @extends('layout')
 
-@section('title', 'Loans')
-@section('breadcrumb', 'Loans')
+@section('title', 'Issued Books')
+@section('breadcrumb', 'Issued Books')
 
 @section('content')
 <div class="flex items-center justify-end mb-4">
-  <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">New Loan</a>
+  <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-600">Issue Book</a>
 </div>
 
 <div class="overflow-x-auto rounded-lg border border-slate-800">
@@ -14,7 +14,7 @@
       <tr>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Book</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Member</th>
-        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Loan Date</th>
+        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Issue Date</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Due Date</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Returned</th>
         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Overdue</th>

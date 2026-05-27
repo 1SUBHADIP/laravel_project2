@@ -60,7 +60,7 @@ class LoanController extends Controller
 
         $book->decrement('available_copies');
 
-        return redirect()->route('loans.index')->with('status', 'Loan created');
+        return redirect()->route('loans.index')->with('status', 'Book issued');
     }
 
     public function return(Loan $loan): RedirectResponse
@@ -87,6 +87,6 @@ class LoanController extends Controller
 
         $loan->delete();
 
-        return redirect()->route('loans.index')->with('status', 'Completed loan deleted');
+        return redirect()->route('loans.index')->with('status', 'Issue record deleted');
     }
 }

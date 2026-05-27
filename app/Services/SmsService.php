@@ -9,6 +9,56 @@ use Illuminate\Support\Facades\Log;
 class SmsService
 {
     /**
+     * Normalize a phone number for SMS delivery.
+     */
+    public function normalizePhoneNumber(string $phoneNumber): string
+    {
+        $cleaned = preg_replace('/[^0-9+]/', '', trim($phoneNumber));
+
+        if ($cleaned === null) {
+            return '';
+        }
+
+        if (str_starts_with($cleaned, '00')) {
+            return '+' . substr($cleaned, 2);
+        }
+
+        if (str_starts_with($cleaned, '+')) {
+            return '+' . preg_replace('/\D+/', '', substr($cleaned, 1));
+        }
+
+        return preg_replace('/\D+/', '', $cleaned) ?: '';
+    }
+
+    /**
+     * Format a phone number for providers that require E.164.
+     */
+    public function formatPhoneNumberForSms(string $phoneNumber): string
+    {
+        $normalized = $this->normalizePhoneNumber($phoneNumber);
+        if ($normalized === '') {
+            return '';
+        }
+
+        if (str_starts_with($normalized, '+')) {
+            return $normalized;
+        }
+
+        $countryCode = (string) config('services.sms.default_country_code', '+1');
+        $countryCode = $this->normalizePhoneNumber($countryCode);
+
+        if ($countryCode === '') {
+            $countryCode = '+1';
+        }
+
+        if (!str_starts_with($countryCode, '+')) {
+            $countryCode = '+' . ltrim($countryCode, '+');
+        }
+
+        return $countryCode . $normalized;
+    }
+
+    /**
      * Send SMS reminder for overdue book
      */
     public function sendOverdueReminder(Loan $loan)
@@ -45,6 +95,16 @@ class SmsService
     private function sendSms($phoneNumber, $message)
     {
         try {
+            $phoneNumber = $this->formatPhoneNumberForSms((string) $phoneNumber);
+
+            if ($phoneNumber === '' || !preg_match('/^\+[1-9]\d{7,14}$/', $phoneNumber)) {
+                Log::warning('SMS delivery skipped because the phone number is invalid or not in E.164 format.', [
+                    'phone' => $phoneNumber,
+                ]);
+
+                return false;
+            }
+
             $twilioSid = config('services.twilio.sid');
             $twilioToken = config('services.twilio.token');
             $twilioFrom = config('services.twilio.from');
@@ -85,8 +145,16 @@ class SmsService
      */
     public function isValidPhoneNumber($phoneNumber)
     {
-        // Basic phone number validation
-        $cleaned = preg_replace('/[^0-9]/', '', $phoneNumber);
-        return strlen($cleaned) >= 10;
+        $formatted = $this->formatPhoneNumberForSms((string) $phoneNumber);
+
+        return (bool) preg_match('/^\+[1-9]\d{7,14}$/', $formatted);
+    }
+
+    /**
+     * Public helper to send a plain SMS message (wraps internal sendSms)
+     */
+    public function sendSmsMessage(string $phoneNumber, string $message): bool
+    {
+        return $this->sendSms($phoneNumber, $message);
     }
 }

@@ -298,9 +298,9 @@
       <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
         <i class="fas fa-exchange-alt text-yellow-400 text-xl"></i>
       </div>
-      <h3 class="text-white font-semibold mb-2">Browse Loans</h3>
-      <p class="text-slate-400 text-sm mb-4">Check loan activities</p>
-      <a href="{{ route('loans.index') }}" class="text-yellow-400 hover:text-yellow-300 text-sm">View All Loans →</a>
+      <h3 class="text-white font-semibold mb-2">Browse Issued Books</h3>
+      <p class="text-slate-400 text-sm mb-4">Check issued book activities</p>
+      <a href="{{ route('loans.index') }}" class="text-yellow-400 hover:text-yellow-300 text-sm">View All Issued Books →</a>
     </div>
     
     <div class="bg-card border border-slate-800 rounded-xl p-6 text-center">

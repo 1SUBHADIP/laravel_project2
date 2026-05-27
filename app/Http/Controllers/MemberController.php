@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Helpers\AdminActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class MemberController extends Controller
@@ -19,7 +20,7 @@ class MemberController extends Controller
 
     public function create(): View
     {
-        $departments = Department::orderBy('name')->get();
+        $departments = Department::query()->orderBy('name', 'asc')->get();
         return view('members.create', compact('departments'));
     }
 
@@ -27,15 +28,25 @@ class MemberController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'student_id' => ['nullable', 'unique:members,student_id', 'max:100'],
+            'student_id' => ['required', 'string', 'unique:members,student_id', 'max:100'],
+            'date_of_birth' => ['nullable', 'date'],
             'email' => ['required', 'email', 'max:255', 'unique:members,email'],
-            'phone' => ['nullable', 'unique:members,phone', 'max:50'],
+            'phone' => ['required', 'string', 'unique:members,phone', 'max:50'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'membership_type' => ['required', 'in:Standard,Premium,Student'],
+            'membership_date' => ['required', 'date'],
+            'status' => ['required', 'in:Active,Inactive,Suspended'],
+            'password' => ['nullable', 'string', 'min:6', 'confirmed'],
             'department_id' => ['nullable', 'string'],
             'department_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data['department_id'] = $this->resolveDepartmentId($request);
         unset($data['department_name']);
+
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
 
         $member = Member::create($data);
         $member->load('department');
@@ -53,7 +64,7 @@ class MemberController extends Controller
 
     public function edit(Member $member): View
     {
-        $departments = Department::orderBy('name')->get();
+        $departments = Department::query()->orderBy('name', 'asc')->get();
         return view('members.edit', compact('member', 'departments'));
     }
 
@@ -61,15 +72,27 @@ class MemberController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'student_id' => ['nullable', 'string', 'max:100'],
+            'student_id' => ['required', 'string', 'max:100'],
+            'date_of_birth' => ['nullable', 'date'],
             'email' => ['required', 'email', 'max:255', 'unique:members,email,' . $member->id],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['required', 'string', 'max:50'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'membership_type' => ['required', 'in:Standard,Premium,Student'],
+            'membership_date' => ['required', 'date'],
+            'status' => ['required', 'in:Active,Inactive,Suspended'],
+            'password' => ['nullable', 'string', 'min:6', 'confirmed'],
             'department_id' => ['nullable', 'string'],
             'department_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data['department_id'] = $this->resolveDepartmentId($request);
         unset($data['department_name']);
+
+        if (empty($data['password'])) {
+            unset($data['password']);
+        } else {
+            $data['password'] = Hash::make($data['password']);
+        }
 
         $member->update($data);
         $member->load('department');
@@ -90,7 +113,7 @@ class MemberController extends Controller
         $name = $member->name;
         $departmentName = $member->department ? $member->department->name : null;
 
-        $member->delete();
+        Member::destroy($member->id);
 
         // Log admin activity
         AdminActivityLogger::log(
